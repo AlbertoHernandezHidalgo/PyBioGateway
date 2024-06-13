@@ -18,8 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "rdflib",
-    "SPARQLWrapper",
-    "collections"
+    "SPARQLWrapper"
 ]
 
 [project.urls]

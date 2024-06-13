@@ -139,7 +139,7 @@ def getGene_info(gene, taxon):
         PREFIX gene: <http://rdf.biogateway.eu/gene/%s/>
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         PREFIX dc: <http://purl.org/dc/terms/>
-        SELECT DISTINCT ?start ?end (REPLACE(STR(?strand), "http://biohackathon.org/resource/faldo#", "") AS ?strand) (REPLACE(STR(?chr), "https://www.ncbi.nlm.nih.gov/nuccore/", "") AS ?chr) (REPLACE(STR(?assembly), "https://www.ncbi.nlm.nih.gov/assembly/", "") AS ?assembly) (REPLACE(STR(?alt_gene_sources), "http://identifiers.org/", "") AS ?alt_gene_sources) ?definition
+        SELECT DISTINCT ?start ?end (REPLACE(STR(?strand), "http://biohackathon.org/resource/faldo#", "") AS ?strand) (REPLACE(STR(?chr),    "https://www.ncbi.nlm.nih.gov/nuccore/", "") AS ?chr) (REPLACE(STR(?assembly), "https://www.ncbi.nlm.nih.gov/assembly/", "") AS ?assembly) (REPLACE(STR(?   alt_gene_sources), "http://identifiers.org/", "") AS ?alt_gene_sources) ?definition
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/gene> {
               gene:%s  obo:GENO_0000894 ?start ;
@@ -178,7 +178,7 @@ def getGene_info(gene, taxon):
 
         return combined_result
     
-    def getGenes_by_coord(chr, start, end , strand):
+def getGenes_by_coord(chr, start, end , strand):
     # Endpoint SPARQL
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
     
@@ -571,7 +571,6 @@ def gene2protein(gene,taxon):
         else:
             # Si se proporciona el nombre del taxón
             query_tax = """
-            PREFIX tax: <http://purl.obolibrary.org/obo/>
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             SELECT DISTINCT ?taxon WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/taxon> {
@@ -718,6 +717,7 @@ def prot2bp(protein):
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX sio: <http://semanticscience.org/resource/>
     PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     SELECT DISTINCT  ?bp_id ?bp_label   ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
     WHERE {
         GRAPH <http://rdf.biogateway.eu/graph/prot> {
@@ -752,6 +752,7 @@ def prot2bp(protein):
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT DISTINCT ?bp_id ?bp_label  ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/prot> {
@@ -809,6 +810,7 @@ def bp2prot(biological_process,taxon):
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
         PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -843,6 +845,7 @@ def bp2prot(biological_process,taxon):
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -877,6 +880,7 @@ def bp2prot(biological_process,taxon):
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -912,6 +916,7 @@ def bp2prot(biological_process,taxon):
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -946,6 +951,7 @@ def bp2prot(biological_process,taxon):
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -985,6 +991,7 @@ def bp2prot(biological_process,taxon):
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1040,6 +1047,7 @@ def prot2cc(protein):
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX sio: <http://semanticscience.org/resource/>
     PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     SELECT DISTINCT  ?cc_id ?cc_label  ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)  
     WHERE {
         GRAPH <http://rdf.biogateway.eu/graph/prot> {
@@ -1074,6 +1082,7 @@ def prot2cc(protein):
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT DISTINCT ?cc_id ?cc_label  ?relation_label  (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/prot> {
@@ -1129,6 +1138,7 @@ def cc2prot(cellular_component,taxon):
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
         PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT DISTINCT  ?protein_name ?relation_label  (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1163,6 +1173,7 @@ def cc2prot(cellular_component,taxon):
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label  (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1197,6 +1208,7 @@ def cc2prot(cellular_component,taxon):
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label  (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1232,6 +1244,7 @@ def cc2prot(cellular_component,taxon):
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT DISTINCT  ?protein_name ?relation_label  (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1266,6 +1279,7 @@ def cc2prot(cellular_component,taxon):
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label  (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1305,6 +1319,7 @@ def cc2prot(cellular_component,taxon):
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT DISTINCT  ?protein_name ?relation_label  (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1361,6 +1376,7 @@ def prot2mf(protein):
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX sio: <http://semanticscience.org/resource/>
     PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     SELECT DISTINCT ?mf_id ?mf_label  ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/prot> {
@@ -1399,6 +1415,7 @@ def prot2mf(protein):
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT DISTINCT ?mf_id ?mf_label ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/prot> {
@@ -1456,6 +1473,7 @@ def mf2prot(molecular_function,taxon):
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
         PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1490,6 +1508,7 @@ def mf2prot(molecular_function,taxon):
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1525,6 +1544,7 @@ def mf2prot(molecular_function,taxon):
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1560,6 +1580,7 @@ def mf2prot(molecular_function,taxon):
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1594,6 +1615,7 @@ def mf2prot(molecular_function,taxon):
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
@@ -1633,6 +1655,7 @@ def mf2prot(molecular_function,taxon):
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
