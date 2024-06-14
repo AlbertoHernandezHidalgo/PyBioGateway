@@ -93,7 +93,7 @@ def getGene_info(gene, taxon):
         results = data_processing(query)
         
         if not results:
-            return "No data available for the introduced gene or you may have introduced an instance that is not a gene.", "Check your data type with type_data function" 
+            return {}
 
         # Combine results into a single dictionary
         combined_result = {
@@ -129,7 +129,7 @@ def getGene_info(gene, taxon):
         tax_result = data_processing(query_tax)
         
         if not tax_result:
-            return "No data available for the introduced gene or you may have introduced an instance that is not a gene.", "Check your data type with type_data function" 
+            return {}
 
         tax_uri = tax_result[0]['taxon']  # Get the taxon URI from the query result
         num_taxon = tax_uri.split('_')[-1]  # Extract the taxon number from the URI
@@ -156,7 +156,7 @@ def getGene_info(gene, taxon):
         results = data_processing(query)
         
         if not results:
-            return "No data available for the introduced gene or you may have introduced an instance that is not a gene.", "Check your data type with type_data function" 
+            return "No data available for the introduced gene"
 
         # Combine results into a single dictionary
         combined_result = {
@@ -225,10 +225,7 @@ def getGenes_by_coord(chr, start, end , strand):
             }}
         """%(chr, strand, start, end)
         results=data_processing(query_alt)
-    if len(results)== 0:
-        return "No data available for the introduced genomic coordinates"
-    else:
-        return results
+    return results
 
 def getProtein_info(protein):
      # Endpoint SPARQL
@@ -253,32 +250,29 @@ def getProtein_info(protein):
     }
     """ %(protein)
     results=data_processing(query)
-    if len(results)== 0:
-        return "No data available for the introduced protein or you may have introduced an instance that is not a protein.", "Check your data type with type_data function."
-    else:
-        combined_result = {
-            'protein_alt_ids': [],
-            'definition': results[0]['definition'],
-            'evidence_level': results[0]['evidence_level'],
-            'alt_sources': [],
-            'articles': []
-        }
+    combined_result = {
+        'protein_alt_ids': [],
+        'definition': results[0]['definition'],
+        'evidence_level': results[0]['evidence_level'],
+        'alt_sources': [],
+        'articles': []
+    }
 
-        for result in results:
-            alt_id = result['protein_alt_id']
-            alt_sources=result['alt_sources']
-            articles=result['articles']
-            if alt_id not in combined_result['protein_alt_ids']:
-                combined_result['protein_alt_ids'].append(alt_id)
-            if alt_sources not in combined_result['alt_sources']:
-                combined_result['alt_sources'].append(alt_sources)
-            if articles not in combined_result['articles']:
-                combined_result['articles'].append(articles)
-
-        combined_result['protein_alt_ids'] = '; '.join(combined_result['protein_alt_ids'])
-        combined_result['alt_sources'] = '; '.join(combined_result['alt_sources'])
-        combined_result['articles'] = '; '.join(combined_result['articles'])
-        return combined_result
+    for result in results:
+        alt_id = result['protein_alt_id']
+        alt_sources=result['alt_sources']
+        articles=result['articles']
+        if alt_id not in combined_result['protein_alt_ids']:
+            combined_result['protein_alt_ids'].append(alt_id)
+        if alt_sources not in combined_result['alt_sources']:
+            combined_result['alt_sources'].append(alt_sources)
+        if articles not in combined_result['articles']:
+            combined_result['articles'].append(articles)
+        
+    combined_result['protein_alt_ids'] = '; '.join(combined_result['protein_alt_ids'])
+    combined_result['alt_sources'] = '; '.join(combined_result['alt_sources'])
+    combined_result['articles'] = '; '.join(combined_result['articles'])
+    return combined_result
 
 def getPhenotype(phenotype):
      # Endpoint SPARQL
@@ -311,8 +305,6 @@ def getPhenotype(phenotype):
         }
         """%(phenotype)
         results=data_processing(query_phen)
-    if not results:
-        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype.", "Check your data type with type_data function."
     return results
 
 def getCRM_info(crm):
@@ -339,8 +331,6 @@ def getCRM_info(crm):
     }
     """ %(crm)
     results=data_processing(query)
-    if not results:
-        return: "No data available for the introduced crm or you may have introduced an instance that is not a crm.", "Check your data type with type_data function."
     return results
 
 def getCRM_add_info(crm):#función que nos devuelve información adicional del CRM.
@@ -376,9 +366,9 @@ def getCRM_add_info(crm):#función que nos devuelve información adicional del C
         'articles': []
     }
 
-    
-     if not results:
-        return: "No data available for the introduced crm or you may have introduced an instance that is not a crm.", "Check your data type with type_data function.
+    # If results are empty, return the combined_result as is
+    if not results:
+        return combined_result
 
     # Get the first result and update combined_result if keys are present
     first_result = results[0]
@@ -422,10 +412,7 @@ def getCRMs_by_coord(chromosome, start, end ):
         }}
     """%(chromosome_ncbi, start, end)
     results=data_processing(query)
-    if len(results)== 0:
-        return "No data available for the introduced genomic coordinates"
-    else:
-        return results
+    return results
 
 def getTAD_info(tad):
     # Endpoint SPARQL
@@ -450,8 +437,6 @@ def getTAD_info(tad):
     }
     """ %(tad)
     results=data_processing(query)
-    if not results:
-        return: "No data available for the introduced tad or you may have introduced an instance that is not a tad.", "Check your data type with type_data function.
     return results
 
 def getTAD_add_info(tad):#función que nos devuelve información adicional del CRM.
@@ -493,7 +478,7 @@ def getTAD_add_info(tad):#función que nos devuelve información adicional del C
 
     # If results are empty, return the combined_result as is
     if not results:
-        return: "No data available for the introduced tad or you may have introduced an instance that is not a tad.", "Check your data type with type_data function.
+        return combined_result
 
     # Get the first result and update combined_result if keys are present
     first_result = results[0]
@@ -540,10 +525,7 @@ def getTADs_by_coord(chromosome, start, end):
         }}
     """%(chromosome_ncbi, start, end)
     results=data_processing(query)
-    if len(results)== 0:
-        return "No data available for the introduced genomic coordinates"
-    else:
-        return results
+    return results
 
 def gene2protein(gene,taxon):
     # Endpoint SPARQL
@@ -565,8 +547,6 @@ def gene2protein(gene,taxon):
             }
         """%(gene)
         results=data_processing(query)
-        if not results:
-            return "No data available for the introduced gene.", ""
         return results
     else:
         if taxon.isdigit():
@@ -587,8 +567,6 @@ def gene2protein(gene,taxon):
                 }
             """ %(taxon,gene)
             results=data_processing(query)
-            if not results:
-                return "No data available for the introduced gene."
             return results
         else:
             # Si se proporciona el nombre del taxón
@@ -622,8 +600,6 @@ def gene2protein(gene,taxon):
                 }
             """ %(num_taxon,gene)
             results=data_processing(query)
-            if not results:
-                return "No data available for the introduced gene."
             return results
         
 def protein2gene(protein):
@@ -665,10 +641,8 @@ def protein2gene(protein):
     }
         """%(protein)
         results=data_processing(query_alt_label)
-    if len(results)== 0 :
-         return "No data available for the introduced protein or you may have introduced an instance that is not a protein.", "Check your data type with type_data function."
-    else:
-        return(results)
+    
+    return(results)
 
 def gene2phen(gene):
     # Endpoint SPARQL
@@ -687,10 +661,7 @@ def gene2phen(gene):
     }
     """%(gene)
     results=data_processing(query)
-    if len(results)== 0:
-        return "No data available for the introduced gene or you may have introduced an instance is not a gene.", "Check your data type with type_data function"
-    else:
-        return(results)
+    return(results)
 
 def phen2gene(phenotype):
     # Endpoint SPARQL
@@ -735,10 +706,7 @@ def phen2gene(phenotype):
         }
         """%(phenotype)
         results=data_processing(query_phen)
-    if len(results)== 0:
-        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype.", "Check your data type with type_data function"
-    else:
-        return(results)
+    return results
 
 def prot2bp(protein):
     # Endpoint SPARQL
@@ -812,8 +780,6 @@ def prot2bp(protein):
         }
         """%(protein)
         results=data_processing(query_alt_label)
-    if not results:
-         return "No data available for the introduced protein or you may have introduced an instance that is not a protein.", "Check your data type with type_data function."
     
     combined_results = defaultdict(lambda: {"bp_id": "", "bp_label": "", "relation_label": "", "database": "", "articles": set()})
 
@@ -1056,8 +1022,7 @@ def bp2prot(biological_process,taxon):
                     """%(biological_process, taxon)
                 results=data_processing(query_alt)
     combined_results = defaultdict(lambda: {"protein_name": "", "relation_label": "", "database": "", "articles": set()})
-    if not results:
-        return "No data available for the introduced biological process", "Check that the biological process id is correct or if you have introduced the taxon correctly."
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['protein_name'], entry['relation_label'], entry['database'])
@@ -1145,9 +1110,7 @@ def prot2cc(protein):
         """%(protein)
         results=data_processing(query_alt_label)
     combined_results = defaultdict(lambda: {"cc_id": "", "cc_label": "", "relation_label": "", "database": "", "articles": set()})
-    if not results:
-         return "No data available for the introduced protein or you may have introduced an instance that is not a protein.", "Check your data type with type_data function."
-    
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['cc_id'], entry['cc_label'], entry['relation_label'], entry['database'])
@@ -1387,8 +1350,7 @@ def cc2prot(cellular_component,taxon):
                     """%(cellular_component, taxon)
                 results=data_processing(query_alt)
     combined_results = defaultdict(lambda: {"protein_name": "", "relation_label": "", "database": "", "articles": set()})
-        if not results:
-        return "No data available for the introduced cellular component", "Check that the cellular component id is correct or if you have introduced the taxon correctly."
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['protein_name'], entry['relation_label'], entry['database'])
@@ -1483,9 +1445,7 @@ def prot2mf(protein):
         results=data_processing(query_alt_label)
 
     combined_results = defaultdict(lambda: {"mf_id": "", "mf_label": "", "relation_label": "", "database": "", "articles": set()})
-    if not results:
-         return "No data available for the introduced protein or you may have introduced an instance that is not a protein.", "Check your data type with type_data function."
-    
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['mf_id'], entry['mf_label'], entry['relation_label'], entry['database'])
@@ -1727,8 +1687,7 @@ def mf2prot(molecular_function,taxon):
                     """%(molecular_function, taxon)
                 results=data_processing(query_alt)
     combined_results = defaultdict(lambda: {"protein_name": "", "relation_label": "", "database": "", "articles": set()})
-    if not results:
-        return "No data available for the introduced molecular function", "Check that the molecular function id is correct or if you have introduced the taxon correctly."
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['protein_name'], entry['relation_label'], entry['database'])
@@ -1774,8 +1733,7 @@ def gene2crm(gene):
     """ %(gene)
     results=data_processing(query)
     combined_results = defaultdict(lambda: {"crm_name": "", "database": set(), "articles": set()})
-    if not results:
-        return "No data available for the introduced gene or you may have introduced an instance that is not a gene.", "Check your data type with type_data function" 
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['crm_name'])
@@ -1836,8 +1794,6 @@ def crm2gene(crm):
         entry['articles'] = '; '.join(entry['articles'])
         entry['database'] = '; '.join(entry['database'])
         final_results.append(entry)
-    if not results:
-        return "No data available for the introduced crm or you may have introduced an instance that is not a crm.", "Check your data type with type_data function"     
     return final_results
 
 def tfac2crm(tfac):
@@ -1874,8 +1830,7 @@ def tfac2crm(tfac):
     """ %(tfac)
     results=data_processing(query)
     combined_results = defaultdict(lambda: {"crm_name": "", "database": set(), "articles": set(), "evidence": "", "biological_samples": set()} )
-    if not results:
-        return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcirption factor.", "Check your data type with type_data function" 
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['crm_name'],entry['evidence'])
@@ -1927,8 +1882,7 @@ def crm2tfac(crm):
     """ %(crm)
     results=data_processing(query)
     combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence": "", "biological_samples": set()} )
-    if not results:
-        return "No data available for the introduced crm or you may have introduced an instance that is not a crm.", "Check your data type with type_data function"    
+
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['tfac_name'],entry['evidence'])
@@ -1974,8 +1928,6 @@ def crm2phen(crm):
     }
     """ %(crm)
     results=data_processing(query)
-    if not results:
-        return "No data available for the introduced crm or you may have introduced an instance that is not a crm.", "Check your data type with type_data function"    
     combined_results = defaultdict(lambda: {"phen_id": "", "database": set(), "articles": set()})
 
     # Llenar el diccionario combinando artículos
@@ -2052,8 +2004,7 @@ def phen2crm(phenotype):
         """ %(phenotype)
         results=data_processing(alt_query)
         combined_results = defaultdict(lambda: {"crm_name": "","omim_id": set(), "database": set(), "articles": set()})
-    if not results:
-        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype.", "Check your data type with type_data function"    
+
         # Llenar el diccionario combinando artículos
         for entry in results:
             key = (entry['crm_name'])
@@ -2170,8 +2121,7 @@ def tfac2gene(tfac):
     """ %(tfac)
     negative_results=data_processing(negative_query)
     combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
-    if not negative_results and not positive_results:
-        return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor.", "Check your data type with type_data function"    
+
     # Llenar el diccionario combinando artículos
     for entry in negative_results:
         key = (entry['gene_name'],entry['evidence_level'],entry['definition'])
@@ -2270,8 +2220,7 @@ def gene2tfac(gene):
     """ %(gene)
     negative_results=data_processing(negative_query)
     combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
-    if not negative_results and not positive_results:
-        return "No data available for the introduced gene or you may have introduced an instance that is not a gene.", "Check your data type with type_data function"
+
     # Llenar el diccionario combinando artículos
     for entry in negative_results:
         key = (entry['tfac_name'],entry['evidence_level'],entry['definition'])

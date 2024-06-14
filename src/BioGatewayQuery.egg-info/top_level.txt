@@ -1,1 +1,1 @@
-BioGatewayQuery_package
+BioGatewayQuery

@@ -2,6 +2,8 @@ Metadata-Version: 2.1
 Name: BioGatewayQuery
 Version: 0.0.1
 Summary: A Python package to perform SPARQL queries and exploit the data available on BioGateway.
+Home-page: https://github.com/AlbertoHernandezHidalgo/BioGatewayQuery_python/
+Author: Alberto Hernandez
 Author-email: Alberto <alberto.hernandezh@um.es>
 Project-URL: Homepage, https://github.com/AlbertoHernandezHidalgo/BioGatewayQuery_python/
 Project-URL: Issues, https://github.com/AlbertoHernandezHidalgo/BioGatewayQuery_python/issues
@@ -13,7 +15,6 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: rdflib
 Requires-Dist: SPARQLWrapper
-Requires-Dist: collections
 
 # BioGatewayQuery
 
