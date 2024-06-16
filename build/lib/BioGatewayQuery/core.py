@@ -76,7 +76,7 @@ def getGene_info(gene, taxon):
         PREFIX gene: <http://rdf.biogateway.eu/gene/%s/>
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         PREFIX dc: <http://purl.org/dc/terms/>
-        SELECT DISTINCT ?start ?end (REPLACE(STR(?strand), "http://biohackathon.org/resource/faldo#", "") AS ?strand) (REPLACE(STR(?chr), "https://www.ncbi.nlm.nih.gov/nuccore/", "") AS ?chr) (REPLACE(STR(?assembly), "https://www.ncbi.nlm.nih.gov/assembly/", "") AS ?assembly) (REPLACE(STR(?alt_gene_id), "http://identifiers.org/", "") AS ?alt_gene_id) ?definition
+        SELECT DISTINCT ?start ?end (REPLACE(STR(?strand), "http://biohackathon.org/resource/faldo#", "") AS ?strand) (REPLACE(STR(?chr), "https://www.ncbi.nlm.nih.gov/nuccore/", "") AS ?chr) (REPLACE(STR(?assembly), "https://www.ncbi.nlm.nih.gov/assembly/", "") AS ?assembly) (REPLACE(STR(?alt_gene_sources), "http://identifiers.org/", "") AS ?alt_gene_sources) ?definition
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/gene> {
               gene:%s  obo:GENO_0000894 ?start ;
@@ -84,7 +84,7 @@ def getGene_info(gene, taxon):
                     obo:BFO_0000050 ?chr ;
                     obo:GENO_0000906 ?strand ;
                     skos:definition ?definition ;
-                    skos:closeMatch ?alt_gene_id ;
+                    skos:closeMatch ?alt_gene_sources ;
                     dc:hasVersion ?assembly .
             }
         }
@@ -93,7 +93,7 @@ def getGene_info(gene, taxon):
         results = data_processing(query)
         
         if not results:
-            return {}
+            return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function." 
 
         # Combine results into a single dictionary
         combined_result = {
@@ -102,16 +102,16 @@ def getGene_info(gene, taxon):
             'strand': results[0]['strand'],
             'chr': results[0]['chr'],
             'assembly': results[0]['assembly'],
-            'alt_gene_id': [],
+            'alt_gene_sources': [],
             'definition': results[0]['definition']
         }
 
         for result in results:
-            alt_gene_id = result['alt_gene_id']
-            if alt_gene_id not in combined_result['alt_gene_id']:
-                combined_result['alt_gene_id'].append(alt_gene_id)
+            alt_gene_sources = result['alt_gene_sources']
+            if alt_gene_sources not in combined_result['alt_gene_sources']:
+                combined_result['alt_gene_sources'].append(alt_gene_sources)
 
-        combined_result['alt_gene_id'] = '; '.join(combined_result['alt_gene_id'])
+        combined_result['alt_gene_sources'] = '; '.join(combined_result['alt_gene_sources'])
 
         return combined_result
     else:
@@ -129,7 +129,7 @@ def getGene_info(gene, taxon):
         tax_result = data_processing(query_tax)
         
         if not tax_result:
-            return {}
+            return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function." 
 
         tax_uri = tax_result[0]['taxon']  # Get the taxon URI from the query result
         num_taxon = tax_uri.split('_')[-1]  # Extract the taxon number from the URI
@@ -139,7 +139,7 @@ def getGene_info(gene, taxon):
         PREFIX gene: <http://rdf.biogateway.eu/gene/%s/>
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         PREFIX dc: <http://purl.org/dc/terms/>
-        SELECT DISTINCT ?start ?end (REPLACE(STR(?strand), "http://biohackathon.org/resource/faldo#", "") AS ?strand) (REPLACE(STR(?chr),    "https://www.ncbi.nlm.nih.gov/nuccore/", "") AS ?chr) (REPLACE(STR(?assembly), "https://www.ncbi.nlm.nih.gov/assembly/", "") AS ?assembly) (REPLACE(STR(?   alt_gene_sources), "http://identifiers.org/", "") AS ?alt_gene_sources) ?definition
+        SELECT DISTINCT ?start ?end (REPLACE(STR(?strand), "http://biohackathon.org/resource/faldo#", "") AS ?strand) (REPLACE(STR(?chr),    "https://www.ncbi.nlm.nih.gov/nuccore/", "") AS ?chr) (REPLACE(STR(?assembly), "https://www.ncbi.nlm.nih.gov/assembly/", "") AS ?assembly) (REPLACE(STR(?alt_gene_sources), "http://identifiers.org/", "") AS ?alt_gene_sources) ?definition
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/gene> {
               gene:%s  obo:GENO_0000894 ?start ;
@@ -156,7 +156,7 @@ def getGene_info(gene, taxon):
         results = data_processing(query)
         
         if not results:
-            return "No data available for the introduced gene"
+            return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function." 
 
         # Combine results into a single dictionary
         combined_result = {
@@ -170,9 +170,9 @@ def getGene_info(gene, taxon):
         }
 
         for result in results:
-            alt_gene_id = result['alt_gene_sources']
-            if alt_gene_id not in combined_result['alt_gene_sources']:
-                combined_result['alt_gene_sources'].append(alt_gene_id)
+            alt_gene_sources = result['alt_gene_sources']
+            if alt_gene_sources not in combined_result['alt_gene_sources']:
+                combined_result['alt_gene_sources'].append(alt_gene_sources)
 
         combined_result['alt_gene_sources'] = '; '.join(combined_result['alt_gene_sources'])
 
@@ -225,7 +225,10 @@ def getGenes_by_coord(chr, start, end , strand):
             }}
         """%(chr, strand, start, end)
         results=data_processing(query_alt)
-    return results
+    if len(results)== 0:
+        return "No data available for the introduced genomic coordinates."
+    else:
+        return results
 
 def getProtein_info(protein):
      # Endpoint SPARQL
@@ -250,29 +253,32 @@ def getProtein_info(protein):
     }
     """ %(protein)
     results=data_processing(query)
-    combined_result = {
-        'protein_alt_ids': [],
-        'definition': results[0]['definition'],
-        'evidence_level': results[0]['evidence_level'],
-        'alt_sources': [],
-        'articles': []
-    }
+    if len(results)== 0:
+        return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    else:
+        combined_result = {
+            'protein_alt_ids': [],
+            'definition': results[0]['definition'],
+            'evidence_level': results[0]['evidence_level'],
+            'alt_sources': [],
+            'articles': []
+        }
 
-    for result in results:
-        alt_id = result['protein_alt_id']
-        alt_sources=result['alt_sources']
-        articles=result['articles']
-        if alt_id not in combined_result['protein_alt_ids']:
-            combined_result['protein_alt_ids'].append(alt_id)
-        if alt_sources not in combined_result['alt_sources']:
-            combined_result['alt_sources'].append(alt_sources)
-        if articles not in combined_result['articles']:
-            combined_result['articles'].append(articles)
-        
-    combined_result['protein_alt_ids'] = '; '.join(combined_result['protein_alt_ids'])
-    combined_result['alt_sources'] = '; '.join(combined_result['alt_sources'])
-    combined_result['articles'] = '; '.join(combined_result['articles'])
-    return combined_result
+        for result in results:
+            alt_id = result['protein_alt_id']
+            alt_sources=result['alt_sources']
+            articles=result['articles']
+            if alt_id not in combined_result['protein_alt_ids']:
+                combined_result['protein_alt_ids'].append(alt_id)
+            if alt_sources not in combined_result['alt_sources']:
+                combined_result['alt_sources'].append(alt_sources)
+            if articles not in combined_result['articles']:
+                combined_result['articles'].append(articles)
+
+        combined_result['protein_alt_ids'] = '; '.join(combined_result['protein_alt_ids'])
+        combined_result['alt_sources'] = '; '.join(combined_result['alt_sources'])
+        combined_result['articles'] = '; '.join(combined_result['articles'])
+        return combined_result
 
 def getPhenotype(phenotype):
      # Endpoint SPARQL
@@ -305,6 +311,8 @@ def getPhenotype(phenotype):
         }
         """%(phenotype)
         results=data_processing(query_phen)
+    if not results:
+        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
     return results
 
 def getCRM_info(crm):
@@ -331,6 +339,8 @@ def getCRM_info(crm):
     }
     """ %(crm)
     results=data_processing(query)
+    if not results:
+        return "No data available for the introduced crm or you may have introduced an instance that is not a crm. Check your data type with type_data function."
     return results
 
 def getCRM_add_info(crm):#función que nos devuelve información adicional del CRM.
@@ -366,9 +376,9 @@ def getCRM_add_info(crm):#función que nos devuelve información adicional del C
         'articles': []
     }
 
-    # If results are empty, return the combined_result as is
+    
     if not results:
-        return combined_result
+            return "No data available for the introduced crm or you may have introduced an instance that is not a crm. Check your data type with type_data function."
 
     # Get the first result and update combined_result if keys are present
     first_result = results[0]
@@ -412,7 +422,10 @@ def getCRMs_by_coord(chromosome, start, end ):
         }}
     """%(chromosome_ncbi, start, end)
     results=data_processing(query)
-    return results
+    if len(results)== 0:
+        return "No data available for the introduced genomic coordinates."
+    else:
+        return results
 
 def getTAD_info(tad):
     # Endpoint SPARQL
@@ -437,6 +450,8 @@ def getTAD_info(tad):
     }
     """ %(tad)
     results=data_processing(query)
+    if not results:
+            return "No data available for the introduced tad or you may have introduced an instance that is not a tad. Check your data type with type_data function."
     return results
 
 def getTAD_add_info(tad):#función que nos devuelve información adicional del CRM.
@@ -478,7 +493,7 @@ def getTAD_add_info(tad):#función que nos devuelve información adicional del C
 
     # If results are empty, return the combined_result as is
     if not results:
-        return combined_result
+        return "No data available for the introduced tad or you may have introduced an instance that is not a tad. Check your data type with type_data function."
 
     # Get the first result and update combined_result if keys are present
     first_result = results[0]
@@ -525,7 +540,10 @@ def getTADs_by_coord(chromosome, start, end):
         }}
     """%(chromosome_ncbi, start, end)
     results=data_processing(query)
-    return results
+    if len(results)== 0:
+        return "No data available for the introduced genomic coordinates."
+    else:
+        return results
 
 def gene2protein(gene,taxon):
     # Endpoint SPARQL
@@ -547,6 +565,8 @@ def gene2protein(gene,taxon):
             }
         """%(gene)
         results=data_processing(query)
+        if not results:
+            return "No data available for the introduced gene. Check that the gene id is correct or if you have introduced the taxon correctly."
         return results
     else:
         if taxon.isdigit():
@@ -567,6 +587,8 @@ def gene2protein(gene,taxon):
                 }
             """ %(taxon,gene)
             results=data_processing(query)
+            if not results:
+                return "No data available for the introduced gene. Check that the gene id is correct or if you have introduced the taxon correctly."
             return results
         else:
             # Si se proporciona el nombre del taxón
@@ -600,6 +622,8 @@ def gene2protein(gene,taxon):
                 }
             """ %(num_taxon,gene)
             results=data_processing(query)
+            if not results:
+                return "No data available for the introduced gene. Check that the gene id is correct or if you have introduced the taxon correctly."
             return results
         
 def protein2gene(protein):
@@ -641,8 +665,10 @@ def protein2gene(protein):
     }
         """%(protein)
         results=data_processing(query_alt_label)
-    
-    return(results)
+    if len(results)== 0 :
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    else:
+        return(results)
 
 def gene2phen(gene):
     # Endpoint SPARQL
@@ -661,7 +687,10 @@ def gene2phen(gene):
     }
     """%(gene)
     results=data_processing(query)
-    return(results)
+    if len(results)== 0:
+        return "No data available for the introduced gene or you may have introduced an instance is not a gene. Check your data type with type_data function"
+    else:
+        return(results)
 
 def phen2gene(phenotype):
     # Endpoint SPARQL
@@ -695,18 +724,21 @@ def phen2gene(phenotype):
         PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX obo: <http://purl.obolibrary.org/obo/>
-        SELECT DISTINCT ?gene_id
+        SELECT DISTINCT ?gene_name
         WHERE {
             GRAPH  <http://rdf.biogateway.eu/graph/gene2phen> {
                 ?gene obo:RO_0002331 omim:%s .
            }
             GRAPH <http://rdf.biogateway.eu/graph/gene> {
-                ?gene skos:prefLabel ?gene_id.  
+                ?gene skos:prefLabel ?gene_name.  
         }
         }
         """%(phenotype)
         results=data_processing(query_phen)
-    return results
+    if len(results)== 0:
+        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function"
+    else:
+        return(results)
 
 def prot2bp(protein):
     # Endpoint SPARQL
@@ -780,6 +812,8 @@ def prot2bp(protein):
         }
         """%(protein)
         results=data_processing(query_alt_label)
+    if not results:
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
     
     combined_results = defaultdict(lambda: {"bp_id": "", "bp_label": "", "relation_label": "", "database": "", "articles": set()})
 
@@ -799,230 +833,231 @@ def prot2bp(protein):
         final_results.append(entry)
     return final_results
 
-def bp2prot(biological_process,taxon):
+def bp2prot(biological_process, taxon):
     # Endpoint SPARQL
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
-    if taxon==None: #si no ponemos taxon
-        query="""
+    if taxon is None: # Si no ponemos taxon
+        query = """
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
         PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
+        SELECT DISTINCT ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/go> {
                   ?bp rdfs:label ?bp_label.
             }
-             FILTER regex(?bp_label, '%s', "i")
+            FILTER regex(?bp_label, '%s', "i")
             GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                ?prot obo:RO_0002331 ?bp .
+                ?prot obo:RO_0002331 ?bp.
             }
             GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?uri rdf:subject ?prot ;
-                         rdf:predicate ?relation ;
-                         rdf:object ?bp ;
-                         skos:prefLabel ?relation_label .
-                }
-             GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?uri rdf:subject ?prot;
+                     rdf:predicate ?relation;
+                     rdf:object ?bp;
+                     skos:prefLabel ?relation_label.
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
                 ?prot skos:prefLabel ?protein_name.
             }
             BIND(IRI(CONCAT(STR(?uri), "#goa")) AS ?uri_with_goa)
-                  GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri_with_goa sio:SIO_000772 ?articles ;
-                                      sio:SIO_000253 ?database .
+            GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                ?uri_with_goa sio:SIO_000772 ?articles;
+                              sio:SIO_000253 ?database.
             }
-            }
-            """ %(biological_process)
-        results=data_processing(query)
-        if len(results)==0:
-            query_alt="""
+        }
+        ORDER BY ?protein_name ?articles
+        """ % (biological_process)
+        results = data_processing(query)
+        if len(results) == 0:
+            query_alt = """
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
+            SELECT DISTINCT ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
-                      ?bp oboowl:id "%s" .
-                }
-                 GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                ?prot obo:RO_0002331 ?bp .
+                      ?bp oboowl:id "%s".
                 }
                 GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?uri rdf:subject ?prot ;
-                         rdf:predicate ?relation ;
-                         rdf:object ?bp ;
-                         skos:prefLabel ?relation_label .
+                    ?prot obo:RO_0002331 ?bp.
                 }
-                 GRAPH <http://rdf.biogateway.eu/graph/prot> {
-                    ?prot skos:prefLabel ?protein_name .
+                GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                    ?uri rdf:subject ?prot;
+                         rdf:predicate ?relation;
+                         rdf:object ?bp;
+                         skos:prefLabel ?relation_label.
+                }
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot skos:prefLabel ?protein_name.
                 }
                 BIND(IRI(CONCAT(STR(?uri), "#goa")) AS ?uri_with_goa)
-                  GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri_with_goa sio:SIO_000772 ?articles ;
-                                      sio:SIO_000253 ?database .
+                GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                    ?uri_with_goa sio:SIO_000772 ?articles;
+                                  sio:SIO_000253 ?database.
                 }
-                }
-                """%(biological_process)
-            results=data_processing(query_alt)
+            }
+            ORDER BY ?protein_name ?articles
+            """ % (biological_process)
+            results = data_processing(query_alt)
     else:
         if taxon.isdigit():
-            query="""
+            query = """
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
+            SELECT DISTINCT ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
                       ?bp rdfs:label ?bp_label.
                 }
-                 FILTER regex(?bp_label, '%s', "i")
+                FILTER regex(?bp_label, '%s', "i")
                 GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?prot obo:RO_0002331 ?bp .
+                    ?prot obo:RO_0002331 ?bp.
                 }
                 GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?uri rdf:subject ?prot ;
-                         rdf:predicate ?relation ;
-                         rdf:object ?bp ;
-                         skos:prefLabel ?relation_label .
+                    ?uri rdf:subject ?prot;
+                         rdf:predicate ?relation;
+                         rdf:object ?bp;
+                         skos:prefLabel ?relation_label.
                 }
-                 GRAPH <http://rdf.biogateway.eu/graph/prot> {
-                    ?prot obo:RO_0002162 tax:%s ;
-                          skos:prefLabel ?protein_name .
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot obo:RO_0002162 tax:%s;
+                          skos:prefLabel ?protein_name.
                 }
                 BIND(IRI(CONCAT(STR(?uri), "#goa")) AS ?uri_with_goa)
-                  GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri_with_goa sio:SIO_000772 ?articles ;
-                                      sio:SIO_000253 ?database .
+                GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                    ?uri_with_goa sio:SIO_000772 ?articles;
+                                  sio:SIO_000253 ?database.
                 }
-                }
-                """ %(biological_process, taxon)
-            results=data_processing(query)
-            if len(results)==0:
-                query_alt="""
+            }
+            ORDER BY ?protein_name ?articles
+            """ % (biological_process, taxon)
+            results = data_processing(query)
+            if len(results) == 0:
+                query_alt = """
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                 PREFIX obo: <http://purl.obolibrary.org/obo/>
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
+                SELECT DISTINCT ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
-                          ?bp oboowl:id "%s" .
-                    }
-                     GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?prot obo:RO_0002331 ?bp .
+                          ?bp oboowl:id "%s".
                     }
                     GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri rdf:subject ?prot ;
-                             rdf:predicate ?relation ;
-                             rdf:object ?bp ;
-                             skos:prefLabel ?relation_label .
+                        ?prot obo:RO_0002331 ?bp.
                     }
-                     GRAPH <http://rdf.biogateway.eu/graph/prot> {
-                        ?prot obo:RO_0002162 tax:%s ;
-                              skos:prefLabel ?protein_name .
+                    GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                        ?uri rdf:subject ?prot;
+                             rdf:predicate ?relation;
+                             rdf:object ?bp;
+                             skos:prefLabel ?relation_label.
+                    }
+                    GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot obo:RO_0002162 tax:%s;
+                              skos:prefLabel ?protein_name.
                     }
                     BIND(IRI(CONCAT(STR(?uri), "#goa")) AS ?uri_with_goa)
-                      GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri_with_goa sio:SIO_000772 ?articles ;
-                                      sio:SIO_000253 ?database .
+                    GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                        ?uri_with_goa sio:SIO_000772 ?articles;
+                                      sio:SIO_000253 ?database.
                     }
-                    }
-                    """%(biological_process, taxon)
-                results=data_processing(query_alt)
+                }
+                ORDER BY ?protein_name ?articles
+                """ % (biological_process, taxon)
+                results = data_processing(query_alt)
         else:
-            # Construir la consulta SPARQL
-            query="""
+            query = """
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX sio: <http://semanticscience.org/resource/>
             PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
+            SELECT DISTINCT ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
             WHERE {
                 GRAPH <http://rdf.biogateway.eu/graph/go> {
                       ?bp rdfs:label ?bp_label.
                 }
-                 FILTER regex(?bp_label, '%s', "i")
+                FILTER regex(?bp_label, '%s', "i")
                 GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?prot obo:RO_0002331 ?bp .
+                    ?prot obo:RO_0002331 ?bp.
                 }
                 GRAPH <http://rdf.biogateway.eu/graph/taxon> {
-                        ?taxon rdfs:label "%s" .
+                    ?taxon rdfs:label "%s".
                 }
                 GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?uri rdf:subject ?prot ;
-                         rdf:predicate ?relation ;
-                         rdf:object ?bp ;
-                         skos:prefLabel ?relation_label .
+                    ?uri rdf:subject ?prot;
+                         rdf:predicate ?relation;
+                         rdf:object ?bp;
+                         skos:prefLabel ?relation_label.
                 }
-
-                 GRAPH <http://rdf.biogateway.eu/graph/prot> {
-                    ?prot obo:RO_0002162 ?taxon ;
-                          skos:prefLabel ?protein_name .
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot obo:RO_0002162 ?taxon;
+                          skos:prefLabel ?protein_name.
                 }
                 BIND(IRI(CONCAT(STR(?uri), "#goa")) AS ?uri_with_goa)
-                      GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri_with_goa sio:SIO_000772 ?articles ;
-                                      sio:SIO_000253 ?database .
+                GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                    ?uri_with_goa sio:SIO_000772 ?articles;
+                                  sio:SIO_000253 ?database.
                 }
-                }
-                """%(biological_process, taxon)
-            results=data_processing(query)
-            if len(results)==0:
-                query_alt="""
+            }
+            ORDER BY ?protein_name ?articles
+            """ % (biological_process, taxon)
+            results = data_processing(query)
+            if len(results) == 0:
+                query_alt = """
                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
                 PREFIX obo: <http://purl.obolibrary.org/obo/>
                 PREFIX sio: <http://semanticscience.org/resource/>
                 PREFIX tax: <http://purl.obolibrary.org/obo/NCBITaxon_>
                 PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT DISTINCT  ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
+                SELECT DISTINCT ?protein_name ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
                 WHERE {
                     GRAPH <http://rdf.biogateway.eu/graph/go> {
-                          ?bp oboowl:id "%s" .
-                    }
-                     GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                    ?prot obo:RO_0002331 ?bp .
-                    }
-                     GRAPH <http://rdf.biogateway.eu/graph/taxon> {
-                        ?taxon rdfs:label "%s" .
+                          ?bp oboowl:id "%s".
                     }
                     GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri rdf:subject ?prot ;
-                             rdf:predicate ?relation ;
-                             rdf:object ?bp ;
-                             skos:prefLabel ?relation_label .
+                        ?prot obo:RO_0002331 ?bp.
                     }
-                     GRAPH <http://rdf.biogateway.eu/graph/prot> {
-                        ?prot obo:RO_0002162 ?taxon ;
-                              skos:prefLabel ?protein_name .
+                    GRAPH <http://rdf.biogateway.eu/graph/taxon> {
+                        ?taxon rdfs:label "%s".
+                    }
+                    GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                        ?uri rdf:subject ?prot;
+                             rdf:predicate ?relation;
+                             rdf:object ?bp;
+                             skos:prefLabel ?relation_label.
+                    }
+                    GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot obo:RO_0002162 ?taxon;
+                              skos:prefLabel ?protein_name.
                     }
                     BIND(IRI(CONCAT(STR(?uri), "#goa")) AS ?uri_with_goa)
-                      GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
-                        ?uri_with_goa sio:SIO_000772 ?articles ;
-                                      sio:SIO_000253 ?database .
+                    GRAPH <http://rdf.biogateway.eu/graph/prot2bp> {
+                        ?uri_with_goa sio:SIO_000772 ?articles;
+                                      sio:SIO_000253 ?database.
                     }
-                    }
-                    """%(biological_process, taxon)
-                results=data_processing(query_alt)
+                }
+                ORDER BY ?protein_name ?articles
+                """ % (biological_process, taxon)
+                results = data_processing(query_alt)
+    
     combined_results = defaultdict(lambda: {"protein_name": "", "relation_label": "", "database": "", "articles": set()})
-
+    if not results:
+        return "No data available for the introduced biological process. Check that the biological process id is correct or if you have introduced the taxon correctly."
+    
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['protein_name'], entry['relation_label'], entry['database'])
@@ -1034,8 +1069,12 @@ def bp2prot(biological_process,taxon):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))  # Ordenar artículos antes de unirlos
         final_results.append(entry)
+    
+    # Ordenar los resultados finales
+    final_results = sorted(final_results, key=lambda x: (x['protein_name'], x['relation_label'], x['database']))
+    
     return final_results
 
 def prot2cc(protein):
@@ -1110,7 +1149,9 @@ def prot2cc(protein):
         """%(protein)
         results=data_processing(query_alt_label)
     combined_results = defaultdict(lambda: {"cc_id": "", "cc_label": "", "relation_label": "", "database": "", "articles": set()})
-
+    if not results:
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['cc_id'], entry['cc_label'], entry['relation_label'], entry['database'])
@@ -1163,6 +1204,7 @@ def cc2prot(cellular_component,taxon):
                                   sio:SIO_000253 ?database .
             }
             }
+            ORDER BY ?protein_name ?articles
             """ %(cellular_component)
         results=data_processing(query)
         if len(results)==0:
@@ -1197,6 +1239,7 @@ def cc2prot(cellular_component,taxon):
                                   sio:SIO_000253 ?database .
                 }
                 }
+                ORDER BY ?protein_name ?articles
                 """ %(cellular_component)
             results=data_processing(query_alt)
     else:
@@ -1234,6 +1277,7 @@ def cc2prot(cellular_component,taxon):
                                   sio:SIO_000253 ?database .
                 }
                 }
+                ORDER BY ?protein_name ?articles
                 """%(cellular_component, taxon)
             results=data_processing(query)
             if len(results)==0:
@@ -1269,6 +1313,7 @@ def cc2prot(cellular_component,taxon):
                                       sio:SIO_000253 ?database .
                     }
                     }
+                    ORDER BY ?protein_name ?articles
                     """%(cellular_component, taxon)
                 results=data_processing(query_alt)
         else:
@@ -1309,6 +1354,7 @@ def cc2prot(cellular_component,taxon):
                                   sio:SIO_000253 ?database .
                 }
                 }
+                ORDER BY ?protein_name ?articles
                 """%(cellular_component, taxon)
             results=data_processing(query)
             if len(results)==0:
@@ -1347,10 +1393,12 @@ def cc2prot(cellular_component,taxon):
                                       sio:SIO_000253 ?database .
                     }
                     }
+                    ORDER BY ?protein_name ?articles
                     """%(cellular_component, taxon)
                 results=data_processing(query_alt)
     combined_results = defaultdict(lambda: {"protein_name": "", "relation_label": "", "database": "", "articles": set()})
-
+    if not results:
+        return "No data available for the introduced cellular component. Check that the cellular component id is correct or if you have introduced the taxon correctly."
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['protein_name'], entry['relation_label'], entry['database'])
@@ -1362,8 +1410,9 @@ def cc2prot(cellular_component,taxon):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
         final_results.append(entry)
+    final_results = sorted(final_results, key=lambda x: (x['protein_name'], x['relation_label'], x['database']))
     return final_results
 
 def prot2mf(protein):
@@ -1445,7 +1494,9 @@ def prot2mf(protein):
         results=data_processing(query_alt_label)
 
     combined_results = defaultdict(lambda: {"mf_id": "", "mf_label": "", "relation_label": "", "database": "", "articles": set()})
-
+    if not results:
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['mf_id'], entry['mf_label'], entry['relation_label'], entry['database'])
@@ -1498,6 +1549,7 @@ def mf2prot(molecular_function,taxon):
                                       sio:SIO_000253 ?database .
             }
             }
+            ORDER BY ?protein_name ?articles
             """ %(molecular_function)
         results=data_processing(query)
         if len(results)==0: #si molecular function es identificador se ejecuta esto
@@ -1532,6 +1584,7 @@ def mf2prot(molecular_function,taxon):
                                       sio:SIO_000253 ?database .
                 }
                 }
+                ORDER BY ?protein_name ?articles
                 """%(molecular_function)
             results=data_processing(query_alt)
         return results
@@ -1570,6 +1623,7 @@ def mf2prot(molecular_function,taxon):
                                       sio:SIO_000253 ?database .
                 }
                 }
+                ORDER BY ?protein_name ?articles
                 """ %(molecular_function, taxon)
             results=data_processing(query)
             if len(results)==0: #si molecular function es identificador se ejecuta esto
@@ -1605,6 +1659,7 @@ def mf2prot(molecular_function,taxon):
                                       sio:SIO_000253 ?database .
                     }
                     }
+                    ORDER BY ?protein_name ?articles
                     """%(molecular_function, taxon)
                 results=data_processing(query_alt)
         else:
@@ -1645,6 +1700,7 @@ def mf2prot(molecular_function,taxon):
                                       sio:SIO_000253 ?database .
                 }
                 }
+                ORDER BY ?protein_name ?articles
                 """%(molecular_function, taxon)
             results=data_processing(query)
             if len(results)==0:
@@ -1684,10 +1740,12 @@ def mf2prot(molecular_function,taxon):
                                       sio:SIO_000253 ?database .
                     }
                     }
+                    ORDER BY ?protein_name ?articles
                     """%(molecular_function, taxon)
                 results=data_processing(query_alt)
     combined_results = defaultdict(lambda: {"protein_name": "", "relation_label": "", "database": "", "articles": set()})
-
+    if not results:
+        return "No data available for the introduced molecular function. Check that the molecular function id is correct or if you have introduced the taxon correctly."
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['protein_name'], entry['relation_label'], entry['database'])
@@ -1699,8 +1757,9 @@ def mf2prot(molecular_function,taxon):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
         final_results.append(entry)
+    final_results = sorted(final_results, key=lambda x: (x['protein_name'], x['relation_label'], x['database']))
     return final_results
 
 def gene2crm(gene):
@@ -1733,7 +1792,8 @@ def gene2crm(gene):
     """ %(gene)
     results=data_processing(query)
     combined_results = defaultdict(lambda: {"crm_name": "", "database": set(), "articles": set()})
-
+    if not results:
+        return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function." 
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['crm_name'])
@@ -1744,9 +1804,11 @@ def gene2crm(gene):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))  # Ordenar artículos
+        entry['database'] = '; '.join(sorted(entry['database']))  # Ordenar bases de datos
         final_results.append(entry)
+    # Ordenar los resultados finales por nombre de CRM
+    final_results = sorted(final_results, key=lambda x: x['crm_name'])
     return final_results
 
 def crm2gene(crm):
@@ -1777,6 +1839,7 @@ def crm2gene(crm):
                sio:SIO_000253 ?database .
         }
     }
+    ORDER BY ?gene_name
     """ %(crm)
     results=data_processing(query)
     combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set()})
@@ -1791,9 +1854,11 @@ def crm2gene(crm):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
+        entry['database'] = '; '.join(sorted(entry['database']))
         final_results.append(entry)
+    if not results:
+        return "No data available for the introduced crm or you may have introduced an instance that is not a crm. Check your data type with type_data function."     
     return final_results
 
 def tfac2crm(tfac):
@@ -1830,7 +1895,8 @@ def tfac2crm(tfac):
     """ %(tfac)
     results=data_processing(query)
     combined_results = defaultdict(lambda: {"crm_name": "", "database": set(), "articles": set(), "evidence": "", "biological_samples": set()} )
-
+    if not results:
+        return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcirption factor. Check your data type with type_data function" 
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['crm_name'],entry['evidence'])
@@ -1842,9 +1908,9 @@ def tfac2crm(tfac):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
-        entry['biological_samples'] = '; '.join(entry['biological_samples'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
+        entry['database'] = '; '.join(sorted(entry['database']))
+        entry['biological_samples'] = '; '.join(sorted(entry['biological_samples']))
         final_results.append(entry)
     return final_results
 
@@ -1882,7 +1948,8 @@ def crm2tfac(crm):
     """ %(crm)
     results=data_processing(query)
     combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence": "", "biological_samples": set()} )
-
+    if not results:
+        return "No data available for the introduced crm or you may have introduced an instance that is not a crm. Check your data type with type_data function."    
     # Llenar el diccionario combinando artículos
     for entry in results:
         key = (entry['tfac_name'],entry['evidence'])
@@ -1894,9 +1961,9 @@ def crm2tfac(crm):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
-        entry['biological_samples'] = '; '.join(entry['biological_samples'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
+        entry['database'] = '; '.join(sorted(entry['database']))
+        entry['biological_samples'] = '; '.join(sorted(entry['biological_samples']))
         final_results.append(entry)
     return final_results
 
@@ -1928,6 +1995,8 @@ def crm2phen(crm):
     }
     """ %(crm)
     results=data_processing(query)
+    if not results:
+        return "No data available for the introduced crm or you may have introduced an instance that is not a crm. Check your data type with type_data function."    
     combined_results = defaultdict(lambda: {"phen_id": "", "database": set(), "articles": set()})
 
     # Llenar el diccionario combinando artículos
@@ -1940,8 +2009,8 @@ def crm2phen(crm):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
+        entry['database'] = '; '.join(sorted(entry['database']))
         final_results.append(entry)
     return final_results
 
@@ -2004,7 +2073,8 @@ def phen2crm(phenotype):
         """ %(phenotype)
         results=data_processing(alt_query)
         combined_results = defaultdict(lambda: {"crm_name": "","omim_id": set(), "database": set(), "articles": set()})
-
+    if not results:
+        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."    
         # Llenar el diccionario combinando artículos
         for entry in results:
             key = (entry['crm_name'])
@@ -2016,9 +2086,9 @@ def phen2crm(phenotype):
         # Convertir el diccionario de vuelta a una lista, uniendo los artículos
         final_results = []
         for entry in combined_results.values():
-            entry['omim_id'] = '; '.join(entry['omim_id'])
-            entry['articles'] = '; '.join(entry['articles'])
-            entry['database'] = '; '.join(entry['database'])
+            entry['omim_id'] = '; '.join(sorted(entry['omim_id']))
+            entry['articles'] = '; '.join(sorted(entry['articles']))
+            entry['database'] = '; '.join(sorted(entry['database']))
             final_results.append(entry)
         return final_results
     else:
@@ -2034,108 +2104,118 @@ def phen2crm(phenotype):
         # Convertir el diccionario de vuelta a una lista, uniendo los artículos
         final_results = []
         for entry in combined_results.values():
-            entry['articles'] = '; '.join(entry['articles'])
-            entry['database'] = '; '.join(entry['database'])
+            entry['articles'] = '; '.join(sorted(entry['articles']))
+            entry['database'] = '; '.join(sorted(entry['database']))
             final_results.append(entry)
         return final_results
     
 def tfac2gene(tfac):
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
-    positive_query="""
+    positive_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX sio: <http://semanticscience.org/resource/>
     PREFIX sch: <http://schema.org/>
 
-    SELECT DISTINCT ?gene_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)  ?evidence_level ?definition
+    SELECT DISTINCT ?gene_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level ?definition
     WHERE {
         GRAPH <http://rdf.biogateway.eu/graph/prot> {
             ?tfac skos:prefLabel "%s" .
         }
-    GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
-                ?tfac obo:RO_0002429 ?gene .
-            }
-     GRAPH <http://rdf.biogateway.eu/graph/gene> {
-                ?gene skos:prefLabel ?gene_name .
-            }
-            GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
-                ?s rdfs:subject ?tfac ; 
-                   rdfs:predicate ?relation ; 
-                   rdfs:object ?gene ;
-                   skos:definition ?definition .
-               ?uri rdfs:type ?s .
-                OPTIONAL { ?uri  sio:SIO_000772 ?articles . }
-                OPTIONAL { ?uri sio:SIO_000253 ?database . }
-                OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
-            }
+        GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+            ?tfac obo:RO_0002429 ?gene .
+        }
+        GRAPH <http://rdf.biogateway.eu/graph/gene> {
+            ?gene skos:prefLabel ?gene_name .
+        }
+        GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+            ?s rdfs:subject ?tfac ; 
+               rdfs:predicate ?relation ; 
+               rdfs:object ?gene ;
+               skos:definition ?definition .
+            ?uri rdfs:type ?s .
+            OPTIONAL { ?uri sio:SIO_000772 ?articles . }
+            OPTIONAL { ?uri sio:SIO_000253 ?database . }
+            OPTIONAL { ?uri sch:evidenceLevel ?evidence_level. }
+        }
     }
-    """ %(tfac)
-    positive_results=data_processing(positive_query)
-    combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
+    """ % (tfac)
+    
+    positive_results = data_processing(positive_query)
+    combined_positive_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
 
     # Llenar el diccionario combinando artículos
     for entry in positive_results:
-        key = (entry['gene_name'],entry['evidence_level'],entry['definition'])
-        combined_results[key]['gene_name'] = entry['gene_name']
-        combined_results[key]['evidence_level'] = entry['evidence_level']
-        combined_results[key]['definition'] = entry['definition']
-        combined_results[key]['database'].add(entry['database'])
-        combined_results[key]['articles'].add(entry['articles'])
-    # Convertir el diccionario de vuelta a una lista, uniendo los artículos
+        key = (entry['gene_name'], entry['evidence_level'], entry['definition'])
+        combined_positive_results[key]['gene_name'] = entry['gene_name']
+        combined_positive_results[key]['evidence_level'] = entry['evidence_level']
+        combined_positive_results[key]['definition'] = entry['definition']
+        combined_positive_results[key]['database'].add(entry['database'])
+        if 'articles' in entry:
+            combined_positive_results[key]['articles'].add(entry['articles'])
+
+    # Convertir el diccionario de vuelta a una lista, uniendo y ordenando los artículos y las bases de datos
     final_positive_results = []
-    for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
+    for entry in combined_positive_results.values():
+        entry['articles'] = '; '.join(sorted(entry['articles'])) if entry['articles'] else ''
+        entry['database'] = '; '.join(sorted(entry['database']))
         final_positive_results.append(entry)
-        
-    negative_query="""
+    
+    negative_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX sio: <http://semanticscience.org/resource/>
     PREFIX sch: <http://schema.org/>
 
-    SELECT DISTINCT ?gene_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)  ?evidence_level ?definition
+    SELECT DISTINCT ?gene_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level ?definition
     WHERE {
         GRAPH <http://rdf.biogateway.eu/graph/prot> {
             ?tfac skos:prefLabel "%s" .
         }
-    GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
-                ?tfac obo:RO_0002430 ?gene .
-            }
-     GRAPH <http://rdf.biogateway.eu/graph/gene> {
-                ?gene skos:prefLabel ?gene_name .
-            }
-            GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
-                ?s rdfs:subject ?tfac ; 
-                   rdfs:predicate ?relation ; 
-                   rdfs:object ?gene ;
-                   skos:definition ?definition .
-               ?uri rdfs:type ?s .
-                OPTIONAL { ?uri  sio:SIO_000772 ?articles . }
-                OPTIONAL { ?uri sio:SIO_000253 ?database . }
-                OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
-            }
+        GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+            ?tfac obo:RO_0002430 ?gene .
+        }
+        GRAPH <http://rdf.biogateway.eu/graph/gene> {
+            ?gene skos:prefLabel ?gene_name .
+        }
+        GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+            ?s rdfs:subject ?tfac ; 
+               rdfs:predicate ?relation ; 
+               rdfs:object ?gene ;
+               skos:definition ?definition .
+            ?uri rdfs:type ?s .
+            OPTIONAL { ?uri sio:SIO_000772 ?articles . }
+            OPTIONAL { ?uri sio:SIO_000253 ?database . }
+            OPTIONAL { ?uri sch:evidenceLevel ?evidence_level. }
+        }
     }
-    """ %(tfac)
-    negative_results=data_processing(negative_query)
-    combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
+    """ % (tfac)
+    
+    negative_results = data_processing(negative_query)
+    combined_negative_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
 
+    if not negative_results and not positive_results:
+        return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor. Check your data type with type_data function"
+    
     # Llenar el diccionario combinando artículos
     for entry in negative_results:
-        key = (entry['gene_name'],entry['evidence_level'],entry['definition'])
-        combined_results[key]['gene_name'] = entry['gene_name']
-        combined_results[key]['evidence_level'] = entry['evidence_level']
-        combined_results[key]['definition'] = entry['definition']
-        combined_results[key]['database'].add(entry['database'])
-        combined_results[key]['articles'].add(entry['articles'])
-    # Convertir el diccionario de vuelta a una lista, uniendo los artículos
+        key = (entry['gene_name'], entry['evidence_level'], entry['definition'])
+        combined_negative_results[key]['gene_name'] = entry['gene_name']
+        combined_negative_results[key]['evidence_level'] = entry['evidence_level']
+        combined_negative_results[key]['definition'] = entry['definition']
+        combined_negative_results[key]['database'].add(entry['database'])
+        if 'articles' in entry:
+            combined_negative_results[key]['articles'].add(entry['articles'])
+
+    # Convertir el diccionario de vuelta a una lista, uniendo y ordenando los artículos y las bases de datos
     final_negative_results = []
-    for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
+    for entry in combined_negative_results.values():
+        entry['articles'] = '; '.join(sorted(entry['articles'])) if entry['articles'] else ''
+        entry['database'] = '; '.join(sorted(entry['database']))
         final_negative_results.append(entry)
+    
     return "Positive regulation results:", final_positive_results, "Negative regulation results:", final_negative_results
 
 def gene2tfac(gene):
@@ -2184,8 +2264,8 @@ def gene2tfac(gene):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_positive_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
+        entry['database'] = '; '.join(sorted(entry['database']))
         final_positive_results.append(entry)
         
     negative_query="""
@@ -2220,7 +2300,8 @@ def gene2tfac(gene):
     """ %(gene)
     negative_results=data_processing(negative_query)
     combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
-
+    if not negative_results and not positive_results:
+        return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function."
     # Llenar el diccionario combinando artículos
     for entry in negative_results:
         key = (entry['tfac_name'],entry['evidence_level'],entry['definition'])
@@ -2232,8 +2313,8 @@ def gene2tfac(gene):
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_negative_results = []
     for entry in combined_results.values():
-        entry['articles'] = '; '.join(entry['articles'])
-        entry['database'] = '; '.join(entry['database'])
+        entry['articles'] = '; '.join(sorted(entry['articles']))
+        entry['database'] = '; '.join(sorted(entry['database']))
         final_negative_results.append(entry)
     return "Positive regulation results:", final_positive_results, "Negative regulation results:", final_negative_results
 
