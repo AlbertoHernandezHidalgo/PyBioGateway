@@ -28,3 +28,11 @@ By contributing to this project, you agree to abide by its terms.
 
 `BioGatewayQuery` was created by Alberto Hernández Hidalgo. It is licensed under the terms
 of the MIT license.
+
+## Contact Information
+For any inquiries or issues, please contact:
+
+Alberto Hernández Hidalgo
+
+Email: albertoherhid@gmail.com
+GitHub: https://github.com/AlbertoHernandezHidalgo
