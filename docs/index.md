@@ -20,25 +20,7 @@ To install the package, use pip:
 pip install BioGatewayQuery
 ```
 
-## Usage
-Here's a brief example of how to use the package:
-```python
-from BioSPARQL import getGene_info, getGenes_by_coord
-# Get Gene info
-result = getGene_info('BRCA1', '9606')
-print(result)
-# Get Genes by Coordinates
-chr = "NC_000001.11"
-start = 1000000
-end = 2000000
-strand = None  # or '+' or '-'
-genes = getGenes_by_coord(chr, start, end, strand)
-print("Genes in the specified coordinates:", genes)
-```
-
 ## Contributing
-
-
 
 Thank you for your interest in contributing to BioGatewayQuery! Here are a few guidelines to get started:
 
