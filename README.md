@@ -34,4 +34,8 @@ For any inquiries or issues, please contact:
 Alberto Hernández Hidalgo
 
 Email: albertoherhid@gmail.com
+<<<<<<< HEAD
 GitHub: https://github.com/AlbertoHernandezHidalgo
+=======
+GitHub: https://github.com/AlbertoHernandezHidalgo
+>>>>>>> 75f4edbdd5b2eff0a7a1ebbd6063506734647d1a
