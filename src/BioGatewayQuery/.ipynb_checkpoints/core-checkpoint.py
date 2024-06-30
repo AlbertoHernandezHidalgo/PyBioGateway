@@ -1,4 +1,3 @@
-from rdflib import Graph
 from SPARQLWrapper import SPARQLWrapper, JSON
 from collections import defaultdict
 from .utils import data_processing, translate_chr
