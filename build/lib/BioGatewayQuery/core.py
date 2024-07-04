@@ -1,5 +1,6 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 from collections import defaultdict
+import urllib.parse
 from .utils import data_processing, translate_chr
 
 def type_data(instance): 
@@ -280,11 +281,11 @@ def getProtein_info(protein):
         return combined_result
 
 def getPhenotype(phenotype):
-     # Endpoint SPARQL
+    # Endpoint SPARQL
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
     
     # Construir la consulta SPARQL
-    query="""
+    query = """
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     SELECT DISTINCT (REPLACE(STR(?omim_id), "http://purl.bioontology.org/ontology/OMIM/", "") AS ?omim_id) ?label
     WHERE {
@@ -295,21 +296,23 @@ def getPhenotype(phenotype):
         }
             FILTER regex(?label, '%s', "i")
     }
-    """ %(phenotype)
-    results=data_processing(query)
+    """ % (urllib.parse.quote(phenotype))
+    
+    results = data_processing(query)
+    
     if len(results) == 0:
-        query_phen="""
+        query_phen = """
         PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         SELECT DISTINCT ?phen_label 
         WHERE {
             GRAPH <http://rdf.biogateway.eu/graph/omim> {
                 omim:%s skos:prefLabel ?phen_label
-              
             }
         }
-        """%(phenotype)
-        results=data_processing(query_phen)
+        """ % (urllib.parse.quote(phenotype))
+        
+        results = data_processing(query_phen)
     if not results:
         return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
     return results
@@ -692,11 +695,10 @@ def gene2phen(gene):
         return(results)
 
 def phen2gene(phenotype):
-    # Endpoint SPARQL
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
     
-    # Construir la consulta SPARQL
-    query="""
+    # Construct the SPARQL query
+    query = """
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX sio: <http://semanticscience.org/resource/>
     PREFIX obo: <http://purl.obolibrary.org/obo/>
@@ -716,24 +718,26 @@ def phen2gene(phenotype):
                              skos:prefLabel ?gene_name.  
         }
         }
-    """ %(phenotype)
-    results=data_processing(query)
+    """ % (urllib.parse.quote(phenotype))
+    
+    results = data_processing(query)
+    
     if len(results) == 0:
-        query_phen="""
+        query_phen = """
         PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX obo: <http://purl.obolibrary.org/obo/>
-        SELECT DISTINCT ?gene_name
+        SELECT DISTINCT ?gene_id
         WHERE {
             GRAPH  <http://rdf.biogateway.eu/graph/gene2phen> {
                 ?gene obo:RO_0002331 omim:%s .
            }
             GRAPH <http://rdf.biogateway.eu/graph/gene> {
-                ?gene skos:prefLabel ?gene_name.  
+                ?gene skos:prefLabel ?gene_id.  
         }
         }
-        """%(phenotype)
-        results=data_processing(query_phen)
+        """ % (urllib.parse.quote(phenotype))
+        results = data_processing(query_phen)
     if len(results)== 0:
         return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function"
     else:
