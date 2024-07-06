@@ -622,7 +622,7 @@ class TestBioGatewayQuery(unittest.TestCase):
     def test_tfac2gene(self):
         expected= tfac2gene("CREB1_HUMAN")
         self.assertEqual(tfac2gene("CREB1_HUMAN"),expected)
-        self.assertEqual(tfac2gene("WORLD"),"No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor. Check your data type with type_data function")
+        self.assertEqual(tfac2gene("WORLD"),"No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor. Check your data type with type_data function.")
         
         
     def test_gene2tfac(self):
