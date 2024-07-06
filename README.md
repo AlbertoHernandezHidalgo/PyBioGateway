@@ -1,6 +1,6 @@
 # PyBioGateway
 
-A Python package to perform SPARQL queries and exploit the data available on BioGateway.
+A Python package to perform queries and exploit the data available on BioGateway.
 
 ## Table of Contents
 

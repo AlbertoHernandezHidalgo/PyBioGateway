@@ -1,6 +1,6 @@
-# BioGatewayQuery
+# PyBioGateway
 
-A Python package to perform SPARQL queries and exploit the data available on BioGateway.
+A Python package to perform queries and exploit the data available on BioGateway.
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ A Python package to perform SPARQL queries and exploit the data available on Bio
 To install the package, use pip:
 
 ```bash
-pip install BioGatewayQuery
+pip install PyBioGateway
 ```
 
 ## Contributing
@@ -25,7 +25,7 @@ By contributing to this project, you agree to abide by its terms.
 
 ## License
 
-`BioGatewayQuery` was created by Alberto Hernández Hidalgo. It is licensed under the terms
+`PyBioGateway` was created by Alberto Hernández Hidalgo. It is licensed under the terms
 of the MIT license.
 
 ## Contact Information
