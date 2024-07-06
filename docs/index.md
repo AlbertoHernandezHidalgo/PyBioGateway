@@ -1,13 +1,13 @@
 # PyBioGateway
 
-A Python package to perform SPARQL queries and exploit the data available on BioGateway.
+A Python package to perform queries and exploit the data available on BioGateway.
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [Code_of_conduct](#code_of_conduct)
+- [Code of conduct](#code_of_conduct)
 - [License](#license)
 - [Contact Information](#contact-information)
 - [Example usage detailed](#example)
@@ -48,7 +48,7 @@ Thank you for your interest in contributing to PyBioGateway! Here are a few guid
 
 Thank you for your contribution!
 
-## Code_of_conduct
+## Code of conduct
 ### Our Pledge
 
 We as members, contributors, and leaders pledge to make participation in our
