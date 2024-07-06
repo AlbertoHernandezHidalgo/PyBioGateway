@@ -1,3 +1,20 @@
+Metadata-Version: 2.1
+Name: PyBioGateway
+Version: 0.0.1
+Summary: A Python package to perform queries and exploit the data available on BioGateway.
+Home-page: https://github.com/AlbertoHernandezHidalgo/PyBioGateway/
+Author: Alberto Hernandez
+Author-email: Alberto <alberto.hernandezh@um.es>
+Project-URL: Homepage, https://github.com/AlbertoHernandezHidalgo/PyBioGateway/
+Project-URL: Issues, https://github.com/AlbertoHernandezHidalgo/PyBioGatewayQuery/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: SPARQLWrapper
+
 # PyBioGateway
 
 A Python package to perform SPARQL queries and exploit the data available on BioGateway.

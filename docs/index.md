@@ -1,4 +1,4 @@
-# BioGatewayQuery
+# PyBioGateway
 
 A Python package to perform SPARQL queries and exploit the data available on BioGateway.
 
@@ -17,17 +17,17 @@ A Python package to perform SPARQL queries and exploit the data available on Bio
 To install the package, use pip:
 
 ```bash
-pip install BioGatewayQuery
+pip install PyBioGateway
 ```
 
 ## Contributing
 
-Thank you for your interest in contributing to BioGatewayQuery! Here are a few guidelines to get started:
+Thank you for your interest in contributing to PyBioGateway! Here are a few guidelines to get started:
 
 ### Getting Started
 
 1. Fork the repository.
-2. Clone your fork: `git clone https://github.com/AlbertoHernandezHidalgo/BioGatewayQuery_python.git`
+2. Clone your fork: `git clone https://github.com/AlbertoHernandezHidalgo/PyBioGateway.git`
 3. Create a new branch: `git checkout -b my-feature-branch`
 4. Make your changes.
 5. Commit your changes: `git commit -m 'Add some feature'`
@@ -170,7 +170,7 @@ https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
 
 ## License
 
-`BioGatewayQuery` was created by Alberto Hernández Hidalgo. It is licensed under the terms
+`PyBioGateway` was created by Alberto Hernández Hidalgo. It is licensed under the terms
 of the MIT license.
 
 Copyright (c) 2018 The Python Packaging Authority
@@ -209,7 +209,7 @@ We have one mutation of interest (rs4784227-> chr16:52565276) and we want to stu
 First we will find the enhancers that are located on these coords with the function getCRMs_by_coord
 
 ```python
-from BioGatewayQuery import getCRMs_by_coord, crm2phen, getPhenotype, crm2gene, gene2protein, prot2bp
+from PyBioGateway import getCRMs_by_coord, crm2phen, getPhenotype, crm2gene, gene2protein, prot2bp
 
 mutation_position = 52565276
 

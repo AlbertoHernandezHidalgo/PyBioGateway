@@ -1,4 +1,4 @@
-# Contributing to BioGatewayQuery
+# Contributing to PyBioGateway
 
 Thank you for your interest in contributing to BioGatewayQuery! Here are a few guidelines to get started:
 

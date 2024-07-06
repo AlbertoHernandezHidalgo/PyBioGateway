@@ -1,11 +1,11 @@
-# Contributing to BioGatewayQuery
+# Contributing to PyBioGateway
 
-Thank you for your interest in contributing to BioGatewayQuery! Here are a few guidelines to get started:
+Thank you for your interest in contributing to PyBioGateway! Here are a few guidelines to get started:
 
 ## Getting Started
 
 1. Fork the repository.
-2. Clone your fork: `git clone https://github.com/AlbertoHernandezHidalgo/BioGatewayQuery_python.git`
+2. Clone your fork: `git clone https://github.com/AlbertoHernandezHidalgo/PyBioGateway.git`
 3. Create a new branch: `git checkout -b my-feature-branch`
 4. Make your changes.
 5. Commit your changes: `git commit -m 'Add some feature'`

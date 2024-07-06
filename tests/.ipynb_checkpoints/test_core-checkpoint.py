@@ -1,6 +1,6 @@
 # tests/test_core.py
 import unittest
-from BioGatewayQuery import *
+from PyBioGateway import *
 
 class TestBioGatewayQuery(unittest.TestCase):
 
