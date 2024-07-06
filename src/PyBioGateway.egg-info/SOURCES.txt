@@ -2,9 +2,9 @@ LICENSE
 README.md
 pyproject.toml
 setup.cfg
-src/BioGatewayQuery/__init__.py
-src/BioGatewayQuery/core.py
-src/BioGatewayQuery/utils.py
+src/PyBioGateway/__init__.py
+src/PyBioGateway/core.py
+src/PyBioGateway/utils.py
 src/PyBioGateway.egg-info/PKG-INFO
 src/PyBioGateway.egg-info/SOURCES.txt
 src/PyBioGateway.egg-info/dependency_links.txt

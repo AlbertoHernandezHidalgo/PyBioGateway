@@ -2200,7 +2200,54 @@ def tfac2gene(tfac):
     combined_negative_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
 
     if not negative_results and not positive_results:
-        return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor. Check your data type with type_data function"
+        general_query= """
+        PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX sch: <http://schema.org/>
+        SELECT DISTINCT ?gene_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)  ?evidence_level ?definition
+        WHERE {
+        GRAPH <http://rdf.biogateway.eu/graph/prot> {
+            ?tfac skos:prefLabel "%s" .
+        }
+
+        GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+                ?s rdfs:subject ?tfac ;
+                    rdfs:object ?gene .
+            }
+        GRAPH <http://rdf.biogateway.eu/graph/gene> {
+                ?gene skos:prefLabel ?gene_name.
+            }
+         GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+                ?s rdfs:subject ?tfac ; 
+                   rdfs:predicate ?relation ; 
+                   rdfs:object ?gene ;
+                   skos:definition ?definition .
+               ?uri rdfs:type ?s .
+                OPTIONAL { ?uri  sio:SIO_000772 ?articles . }
+                OPTIONAL { ?uri sio:SIO_000253 ?database . }
+                OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
+            }
+        }
+        """%(tfac)
+        general_results=data_processing(general_query)
+        combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
+        for entry in general_results:
+            key = (entry['gene_name'],entry['evidence_level'],entry['definition'])
+            combined_results[key]['gene_name'] = entry['gene_name']
+            combined_results[key]['evidence_level'] = entry['evidence_level']
+            combined_results[key]['definition'] = entry['definition']
+            combined_results[key]['database'].add(entry['database'])
+            combined_results[key]['articles'].add(entry['articles'])
+        final_general_results = []
+        for entry in combined_results.values():
+            entry['articles'] = '; '.join(sorted(entry['articles']))
+            entry['database'] = '; '.join(sorted(entry['database']))
+            final_general_results.append(entry)        
+        if not general_results:
+            return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor. Check your data type with type_data function."
+        else:
+            return "Genes related with the selected transcription factor:", final_general_results
     
     # Llenar el diccionario combinando artículos
     for entry in negative_results:
@@ -2220,6 +2267,7 @@ def tfac2gene(tfac):
         final_negative_results.append(entry)
     
     return "Positive regulation results:", final_positive_results, "Negative regulation results:", final_negative_results
+
 
 def gene2tfac(gene):
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
@@ -2304,8 +2352,55 @@ def gene2tfac(gene):
     negative_results=data_processing(negative_query)
     combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
     if not negative_results and not positive_results:
-        return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function."
-    # Llenar el diccionario combinando artículos
+        general_query= """
+        PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX sch: <http://schema.org/>
+        SELECT DISTINCT ?tfac_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)  ?evidence_level ?definition
+        WHERE {
+            GRAPH <http://rdf.biogateway.eu/graph/gene> {
+                ?gene skos:prefLabel "%s" .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+                ?s rdfs:object ?gene ;
+                    rdfs:subject ?tfac .
+            }
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?tfac skos:prefLabel ?tfac_name
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+                ?s rdfs:subject ?tfac ; 
+                   rdfs:predicate ?relation ; 
+                   rdfs:object ?gene ;
+                   skos:definition ?definition .
+               ?uri rdfs:type ?s .
+                OPTIONAL { ?uri  sio:SIO_000772 ?articles . }
+                OPTIONAL { ?uri sio:SIO_000253 ?database . }
+                OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
+            }
+        }
+        """%(gene)
+        general_results=data_processing(general_query)
+        combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
+        for entry in general_results:
+            key = (entry['tfac_name'],entry['evidence_level'],entry['definition'])
+            combined_results[key]['tfac_name'] = entry['tfac_name']
+            combined_results[key]['evidence_level'] = entry['evidence_level']
+            combined_results[key]['definition'] = entry['definition']
+            combined_results[key]['database'].add(entry['database'])
+            combined_results[key]['articles'].add(entry['articles'])
+        final_general_results = []
+        for entry in combined_results.values():
+            entry['articles'] = '; '.join(sorted(entry['articles']))
+            entry['database'] = '; '.join(sorted(entry['database']))
+            final_general_results.append(entry)
+        if not general_results:
+            return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function."
+        else:
+            return "Transcription factors related with the selected gene:", final_general_results
+        
+
     for entry in negative_results:
         key = (entry['tfac_name'],entry['evidence_level'],entry['definition'])
         combined_results[key]['tfac_name'] = entry['tfac_name']
@@ -2320,4 +2415,3 @@ def gene2tfac(gene):
         entry['database'] = '; '.join(sorted(entry['database']))
         final_negative_results.append(entry)
     return "Positive regulation results:", final_positive_results, "Negative regulation results:", final_negative_results
-
