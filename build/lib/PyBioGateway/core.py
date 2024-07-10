@@ -301,20 +301,21 @@ def getPhenotype(phenotype):
     results = data_processing(query)
     
     if len(results) == 0:
-        query_phen = """
-        PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        SELECT DISTINCT ?phen_label 
-        WHERE {
-            GRAPH <http://rdf.biogateway.eu/graph/omim> {
-                omim:%s skos:prefLabel ?phen_label
+        if phenotype.isdigit() and len(phenotype) == 6 or phenotype.startswith("MTHU"):
+            query_phen = """
+            PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            SELECT DISTINCT ?phen_label 
+            WHERE {
+                GRAPH <http://rdf.biogateway.eu/graph/omim> {
+                    omim:%s skos:prefLabel ?phen_label
+                }
             }
-        }
-        """ % (urllib.parse.quote(phenotype))
-        
-        results = data_processing(query_phen)
-    if not results:
-        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
+            """ %(phenotype)
+
+            results = data_processing(query_phen)
+        else:
+            return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
     return results
 
 def getCRM_info(crm):
@@ -724,7 +725,7 @@ def phen2gene(phenotype):
     
     if len(results) == 0:
         # Check if the phenotype is a valid OMIM identifier
-        if phenotype.isdigit() and len(phenotype) == 6:
+        if phenotype.isdigit() and len(phenotype) == 6 or phenotype.startswith("MTHU"):
             query_phen = f"""
             PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2055,7 +2056,7 @@ def phen2crm(phenotype):
 
     
     if len(results) == 0:
-        if phenotype.isdigit() and len(phenotype) == 6:
+        if phenotype.isdigit() and len(phenotype) == 6 or phenotype.startswith("MTHU"):
             alt_query = f"""
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
