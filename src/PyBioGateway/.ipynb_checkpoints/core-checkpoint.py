@@ -284,19 +284,19 @@ def getPhenotype(phenotype):
     # Endpoint SPARQL
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
     
-    # Construir la consulta SPARQL
-    query = """
+    # Build the SPARQL query
+    query = f"""
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     SELECT DISTINCT (REPLACE(STR(?omim_id), "http://purl.bioontology.org/ontology/OMIM/", "") AS ?omim_id) ?label
-    WHERE {
-        GRAPH <http://rdf.biogateway.eu/graph/omim> {
-            {?omim_id skos:prefLabel ?label}
+    WHERE {{
+        GRAPH <http://rdf.biogateway.eu/graph/omim> {{
+            {{?omim_id skos:prefLabel ?label}}
             UNION
-            {?omim_id skos:altLabel ?label}
-        }
-            FILTER regex(?label, '%s', "i")
-    }
-    """ % (urllib.parse.quote(phenotype))
+            {{?omim_id skos:altLabel ?label}}
+        }}
+        FILTER regex(?label, "{phenotype}", "i")
+    }}
+    """
     
     results = data_processing(query)
     
@@ -690,58 +690,61 @@ def gene2phen(gene):
     """%(gene)
     results=data_processing(query)
     if len(results)== 0:
-        return "No data available for the introduced gene or you may have introduced an instance is not a gene. Check your data type with type_data function"
+        return "No data available for the introduced gene or you may have introduced an instance is not a gene. Check your data type with type_data function."
     else:
         return(results)
-
+    
 def phen2gene(phenotype):
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
     
-    # Construct the SPARQL query
-    query = """
+    # Construct the SPARQL query for general phenotype search
+    query = f"""
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX sio: <http://semanticscience.org/resource/>
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     SELECT DISTINCT ?gene_name
-        WHERE {
-            GRAPH <http://rdf.biogateway.eu/graph/omim> {
-                {?omim_id skos:prefLabel ?label}
-                UNION
-                {?omim_id skos:altLabel ?label}
-            }
-                FILTER regex(?label, '%s', "i")
-             GRAPH  <http://rdf.biogateway.eu/graph/gene2phen> {
-                ?gene obo:RO_0002331 ?omim_id .
-           }
-             GRAPH <http://rdf.biogateway.eu/graph/gene> {
-                        ?gene sio:SIO_010078 ?prot ;
-                             skos:prefLabel ?gene_name.  
-        }
-        }
-    """ % (urllib.parse.quote(phenotype))
+    WHERE {{
+        GRAPH <http://rdf.biogateway.eu/graph/omim> {{
+            {{?omim_id skos:prefLabel ?label}}
+            UNION
+            {{?omim_id skos:altLabel ?label}}
+        }}
+        FILTER regex(?label, "{phenotype}", "i")
+        GRAPH <http://rdf.biogateway.eu/graph/gene2phen> {{
+            ?gene obo:RO_0002331 ?omim_id .
+        }}
+        GRAPH <http://rdf.biogateway.eu/graph/gene> {{
+            ?gene sio:SIO_010078 ?prot ;
+                  skos:prefLabel ?gene_name.
+        }}
+    }}
+    """
     
     results = data_processing(query)
     
     if len(results) == 0:
-        query_phen = """
-        PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        PREFIX obo: <http://purl.obolibrary.org/obo/>
-        SELECT DISTINCT ?gene_id
-        WHERE {
-            GRAPH  <http://rdf.biogateway.eu/graph/gene2phen> {
-                ?gene obo:RO_0002331 omim:%s .
-           }
-            GRAPH <http://rdf.biogateway.eu/graph/gene> {
-                ?gene skos:prefLabel ?gene_id.  
-        }
-        }
-        """ % (urllib.parse.quote(phenotype))
-        results = data_processing(query_phen)
-    if len(results)== 0:
-        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function"
-    else:
-        return(results)
+        # Check if the phenotype is a valid OMIM identifier
+        if phenotype.isdigit() and len(phenotype) == 6:
+            query_phen = f"""
+            PREFIX omim: <http://purl.bioontology.org/ontology/OMIM/>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX obo: <http://purl.obolibrary.org/obo/>
+            SELECT DISTINCT ?gene_id
+            WHERE {{
+                GRAPH  <http://rdf.biogateway.eu/graph/gene2phen> {{
+                    ?gene obo:RO_0002331 omim:{phenotype} .
+               }}
+                GRAPH <http://rdf.biogateway.eu/graph/gene> {{
+                    ?gene skos:prefLabel ?gene_id.  
+                }}
+            }}
+            """ 
+            results = data_processing(query_phen)
+        else:
+            return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
+    return results
+
+
 
 def prot2bp(protein):
     # Endpoint SPARQL
@@ -2018,99 +2021,97 @@ def crm2phen(crm):
     return final_results
 
 def phen2crm(phenotype):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
-    query="""
-    PREFIX obo: <http://purl.obolibrary.org/obo/>
-    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-    PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-    PREFIX sio: <http://semanticscience.org/resource/>
-    PREFIX omim:<http://purl.bioontology.org/ontology/OMIM/>
-    SELECT DISTINCT ?crm_name  ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
-    WHERE {
-        GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {
-            ?crm obo:RO_0002331 omim:%s .
-        }
-        GRAPH <http://rdf.biogateway.eu/graph/crm> {
-            ?crm skos:prefLabel ?crm_name .
-        }
-        GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {
-            ?s rdfs:subject ?crm ; 
-               rdfs:predicate ?relation ; 
-               rdfs:object ?phen .
-            ?uri rdfs:type ?s .
-            OPTIONAL { ?uri  sio:SIO_000772 ?articles . }
-            OPTIONAL { ?uri sio:SIO_000253 ?database . }
-        }
-    }
-    """%(phenotype)
-    results=data_processing(query)
-    if len(results)==0:
-        alt_query="""
+    query = f"""
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX sio: <http://semanticscience.org/resource/>
         PREFIX obo: <http://purl.obolibrary.org/obo/>
         SELECT DISTINCT ?crm_name (REPLACE(STR(?omim_id), "http://purl.bioontology.org/ontology/OMIM/", "OMIM/") AS ?omim_id) ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)
-        WHERE {
-            GRAPH <http://rdf.biogateway.eu/graph/omim> {
-                {?omim_id skos:prefLabel ?label}
+        WHERE {{
+            GRAPH <http://rdf.biogateway.eu/graph/omim> {{
+                {{?omim_id skos:prefLabel ?label}}
                 UNION
-                {?omim_id skos:altLabel ?label}
-                FILTER regex(?label, '%s', "i")
-        }
-                GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {
-            ?crm obo:RO_0002331 ?omim_id.
-        }
-        GRAPH <http://rdf.biogateway.eu/graph/crm> {
-            ?crm skos:prefLabel ?crm_name .
-        }
-        GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {
-            ?s rdfs:subject ?crm ; 
-               rdfs:predicate ?relation ; 
-               rdfs:object ?phen .
-            ?uri rdfs:type ?s .
-            OPTIONAL { ?uri  sio:SIO_000772 ?articles . }
-            OPTIONAL { ?uri sio:SIO_000253 ?database . }
-        }
-        }
-        """ %(phenotype)
-        results=data_processing(alt_query)
-        combined_results = defaultdict(lambda: {"crm_name": "","omim_id": set(), "database": set(), "articles": set()})
-    if not results:
-        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."    
-        # Llenar el diccionario combinando artículos
-        for entry in results:
-            key = (entry['crm_name'])
+                {{?omim_id skos:altLabel ?label}}
+                FILTER regex(?label, "{phenotype}", "i")
+            }}
+            GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {{
+                ?crm obo:RO_0002331 ?omim_id.
+            }}
+            GRAPH <http://rdf.biogateway.eu/graph/crm> {{
+                ?crm skos:prefLabel ?crm_name .
+            }}
+            GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {{
+                ?s rdfs:subject ?crm ; 
+                   rdfs:predicate ?relation ; 
+                   rdfs:object ?phen .
+                ?uri rdfs:type ?s .
+                OPTIONAL {{ ?uri sio:SIO_000772 ?articles . }}
+                OPTIONAL {{ ?uri sio:SIO_000253 ?database . }}
+            }}
+        }}
+    """
+    
+    results = data_processing(query)
+
+    
+    if len(results) == 0:
+        if phenotype.isdigit() and len(phenotype) == 6:
+            alt_query = f"""
+            PREFIX obo: <http://purl.obolibrary.org/obo/>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX sio: <http://semanticscience.org/resource/>
+            PREFIX omim:<http://purl.bioontology.org/ontology/OMIM/>
+            SELECT DISTINCT ?crm_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) 
+            WHERE {{
+                GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {{
+                    ?crm obo:RO_0002331 omim:{phenotype} .
+                }}
+                GRAPH <http://rdf.biogateway.eu/graph/crm> {{
+                    ?crm skos:prefLabel ?crm_name .
+                }}
+                GRAPH <http://rdf.biogateway.eu/graph/crm2phen> {{
+                    ?s rdfs:subject ?crm ; 
+                       rdfs:predicate ?relation ; 
+                       rdfs:object ?phen .
+                    ?uri rdfs:type ?s .
+                    OPTIONAL {{ ?uri sio:SIO_000772 ?articles . }}
+                    OPTIONAL {{ ?uri sio:SIO_000253 ?database . }}
+                }}
+            }}
+            """
+            results = data_processing(alt_query)
+
+            
+        else:
+            return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
+    
+    # Procesamiento de los resultados
+    combined_results = defaultdict(lambda: {"crm_name": "", "omim_id": set(), "database": set(), "articles": set()})
+    
+    for entry in results:
+        if 'crm_name' in entry:
+            key = entry['crm_name']
             combined_results[key]['crm_name'] = entry['crm_name']
-            combined_results[key]['omim_id'].add(entry['omim_id'])
-            combined_results[key]['database'].add(entry['database'])
-            combined_results[key]['articles'].add(entry['articles'])
-
-        # Convertir el diccionario de vuelta a una lista, uniendo los artículos
-        final_results = []
-        for entry in combined_results.values():
-            entry['omim_id'] = '; '.join(sorted(entry['omim_id']))
-            entry['articles'] = '; '.join(sorted(entry['articles']))
-            entry['database'] = '; '.join(sorted(entry['database']))
-            final_results.append(entry)
-        return final_results
-    else:
-        combined_results = defaultdict(lambda: {"crm_name": "", "database": set(), "articles": set()})
-
-        # Llenar el diccionario combinando artículos
-        for entry in results:
-            key = (entry['crm_name'])
-            combined_results[key]['crm_name'] = entry['crm_name']
-            combined_results[key]['database'].add(entry['database'])
-            combined_results[key]['articles'].add(entry['articles'])
-
-        # Convertir el diccionario de vuelta a una lista, uniendo los artículos
-        final_results = []
-        for entry in combined_results.values():
-            entry['articles'] = '; '.join(sorted(entry['articles']))
-            entry['database'] = '; '.join(sorted(entry['database']))
-            final_results.append(entry)
-        return final_results
+            if 'omim_id' in entry:
+                combined_results[key]['omim_id'].add(entry['omim_id'])
+            if 'database' in entry:
+                combined_results[key]['database'].add(entry['database'])
+            if 'articles' in entry:
+                combined_results[key]['articles'].add(entry['articles'])
+    
+    final_results = []
+    for entry in combined_results.values():
+        # Eliminar omim_id en los resultados de la segunda consulta
+        if phenotype.isdigit() and len(phenotype) == 6:
+            del entry['omim_id']
+        else:
+            entry['omim_id'] = '; '.join(entry['omim_id'])
+        entry['database'] = '; '.join(entry['database'])
+        entry['articles'] = '; '.join(entry['articles'])
+        final_results.append(entry)
+    
+    return final_results
     
 def tfac2gene(tfac):
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"

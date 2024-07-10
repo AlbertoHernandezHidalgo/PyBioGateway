@@ -267,14 +267,14 @@ class TestBioGatewayQuery(unittest.TestCase):
   'phen_label': 'Fanconi anemia, complementation group S (FANCS)'}]
         
         self.assertEqual(gene2phen("BRCA1"),expected)
-        self.assertEqual(gene2phen("WORLD"),"No data available for the introduced gene or you may have introduced an instance is not a gene. Check your data type with type_data function")
+        self.assertEqual(gene2phen("WORLD"),"No data available for the introduced gene or you may have introduced an instance is not a gene. Check your data type with type_data function.")
     
     def test_phen2gene(self):
         expected=[{'gene_name': 'MXRA5'}, {'gene_name': 'BRAF'}, {'gene_name': 'ERBB2'}, {'gene_name': 'SLC22A18'}]
         
         self.assertEqual(phen2gene("lung cancer"),expected)
         self.assertEqual(phen2gene("211980"),expected)
-        self.assertEqual(phen2gene("21198888"),"No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function")
+        self.assertEqual(phen2gene("21198888"),"No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function.")
         
     def test_prot2bp(self):
         expected=[{'bp_id': 'GO:0006357',
@@ -613,10 +613,128 @@ class TestBioGatewayQuery(unittest.TestCase):
         self.assertEqual(crm2phen("WORLD"),"No data available for the introduced crm or you may have introduced an instance that is not a crm. Check your data type with type_data function.")
         
     def test_phen2crm(self):
-        expected=[{'crm_name': 'crm/CRMHS00000005764', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005770', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005771', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25434007'}, {'crm_name': 'crm/CRMHS00000005773', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005816', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756; pubmed/27276213'}, {'crm_name': 'crm/CRMHS00000005892', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005893', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005907', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005918', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005997', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005998', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00000005999', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/; http://health.tsinghua.edu.cn/jianglab/endisease/', 'articles': 'pubmed/25453756'}, {'crm_name': 'crm/CRMHS00027685953', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/', 'articles': 'pubmed/25910213'}, {'crm_name': 'crm/CRMHS00027685954', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/', 'articles': 'pubmed/25910213'}, {'crm_name': 'crm/CRMHS00027685955', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/', 'articles': 'pubmed/25910213'}, {'crm_name': 'crm/CRMHS00027685956', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/', 'articles': 'pubmed/25910213'}, {'crm_name': 'crm/CRMHS00027685957', 'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/', 'articles': 'pubmed/25910213'}]
+        expected=[{'crm_name': 'crm/CRMHS00000005764',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005770',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005771',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25434007'},
+ {'crm_name': 'crm/CRMHS00000005773',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005816',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756; pubmed/27276213'},
+ {'crm_name': 'crm/CRMHS00000005892',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005893',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005907',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005918',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005997',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005998',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005999',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00027685953',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685954',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685955',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685956',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685957',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'}]
+        expected_2=[{'crm_name': 'crm/CRMHS00000005764',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005770',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005771',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25434007'},
+ {'crm_name': 'crm/CRMHS00000005773',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005816',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756; pubmed/27276213'},
+ {'crm_name': 'crm/CRMHS00000005892',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005893',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005907',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005918',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005997',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005998',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00000005999',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://health.tsinghua.edu.cn/jianglab/endisease/; http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25453756'},
+ {'crm_name': 'crm/CRMHS00027685953',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685954',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685955',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685956',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'},
+ {'crm_name': 'crm/CRMHS00027685957',
+  'omim_id': 'OMIM/181500',
+  'database': 'http://biocc.hrbmu.edu.cn/DiseaseEnhancer/',
+  'articles': 'pubmed/25910213'}]
         
         self.assertEqual(phen2crm("181500"),expected)
-        self.assertEqual(phen2crm("SCHIZOPHRENIA"),expected)
+        self.assertEqual(phen2crm("SCHIZOPHRENIA"),expected_2)
         self.assertEqual(phen2crm("WORLD"),"No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function.")
         
     def test_tfac2gene(self):
