@@ -740,9 +740,10 @@ def phen2gene(phenotype):
             }}
             """ 
             results = data_processing(query_phen)
-        else:
-            return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
-    return results
+    if len(results) != 0:
+        return results
+    else:
+        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
 
 
 
@@ -1971,7 +1972,8 @@ def crm2tfac(crm):
         entry['database'] = '; '.join(sorted(entry['database']))
         entry['biological_samples'] = '; '.join(sorted(entry['biological_samples']))
         final_results.append(entry)
-    return final_results
+    else:
+        return final_results
 
 def crm2phen(crm):
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
@@ -2083,8 +2085,7 @@ def phen2crm(phenotype):
             results = data_processing(alt_query)
 
             
-        else:
-            return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
+
     
     # Procesamiento de los resultados
     combined_results = defaultdict(lambda: {"crm_name": "", "omim_id": set(), "database": set(), "articles": set()})
@@ -2110,8 +2111,10 @@ def phen2crm(phenotype):
         entry['database'] = '; '.join(entry['database'])
         entry['articles'] = '; '.join(entry['articles'])
         final_results.append(entry)
-    
-    return final_results
+    if len(final_results) != 0:
+        return final_results
+    else:
+        return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
     
 def tfac2gene(tfac):
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
@@ -2230,7 +2233,7 @@ def tfac2gene(tfac):
                 OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
             }
         }
-        """%(tfac)
+        """ %(tfac)
         general_results=data_processing(general_query)
         combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
         for entry in general_results:
@@ -2272,7 +2275,7 @@ def tfac2gene(tfac):
 
 def gene2tfac(gene):
     endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
-    positive_query="""
+    positive_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -2301,26 +2304,29 @@ def gene2tfac(gene):
                 OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
             }
     }
-    """ %(gene)
-    positive_results=data_processing(positive_query)
-    combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
+    """ % (gene)
+    positive_results = data_processing(positive_query)
+    combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
 
     # Llenar el diccionario combinando artículos
     for entry in positive_results:
-        key = (entry['tfac_name'],entry['evidence_level'],entry['definition'])
+        key = (entry['tfac_name'], entry['evidence_level'], entry['definition'])
         combined_results[key]['tfac_name'] = entry['tfac_name']
         combined_results[key]['evidence_level'] = entry['evidence_level']
         combined_results[key]['definition'] = entry['definition']
-        combined_results[key]['database'].add(entry['database'])
-        combined_results[key]['articles'].add(entry['articles'])
+        if 'database' in entry:
+            combined_results[key]['database'].add(entry['database'])
+        if 'articles' in entry:
+            combined_results[key]['articles'].add(entry['articles'])
+
     # Convertir el diccionario de vuelta a una lista, uniendo los artículos
     final_positive_results = []
     for entry in combined_results.values():
         entry['articles'] = '; '.join(sorted(entry['articles']))
         entry['database'] = '; '.join(sorted(entry['database']))
         final_positive_results.append(entry)
-        
-    negative_query="""
+
+    negative_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -2349,11 +2355,12 @@ def gene2tfac(gene):
                 OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
             }
     }
-    """ %(gene)
-    negative_results=data_processing(negative_query)
-    combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
+    """ % (gene)
+    negative_results = data_processing(negative_query)
+    combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
+
     if not negative_results and not positive_results:
-        general_query= """
+        general_query = """
         PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX sio: <http://semanticscience.org/resource/>
@@ -2381,38 +2388,27 @@ def gene2tfac(gene):
                 OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
             }
         }
-        """%(gene)
-        general_results=data_processing(general_query)
-        combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
+        """ % (gene)
+        general_results = data_processing(general_query)
+        combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
+
         for entry in general_results:
-            key = (entry['tfac_name'],entry['evidence_level'],entry['definition'])
+            key = (entry['tfac_name'], entry['evidence_level'], entry['definition'])
             combined_results[key]['tfac_name'] = entry['tfac_name']
             combined_results[key]['evidence_level'] = entry['evidence_level']
             combined_results[key]['definition'] = entry['definition']
-            combined_results[key]['database'].add(entry['database'])
-            combined_results[key]['articles'].add(entry['articles'])
+            if 'database' in entry:
+                combined_results[key]['database'].add(entry['database'])
+            if 'articles' in entry:
+                combined_results[key]['articles'].add(entry['articles'])
+
         final_general_results = []
         for entry in combined_results.values():
             entry['articles'] = '; '.join(sorted(entry['articles']))
             entry['database'] = '; '.join(sorted(entry['database']))
             final_general_results.append(entry)
+
         if not general_results:
             return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function."
         else:
             return "Transcription factors related with the selected gene:", final_general_results
-        
-
-    for entry in negative_results:
-        key = (entry['tfac_name'],entry['evidence_level'],entry['definition'])
-        combined_results[key]['tfac_name'] = entry['tfac_name']
-        combined_results[key]['evidence_level'] = entry['evidence_level']
-        combined_results[key]['definition'] = entry['definition']
-        combined_results[key]['database'].add(entry['database'])
-        combined_results[key]['articles'].add(entry['articles'])
-    # Convertir el diccionario de vuelta a una lista, uniendo los artículos
-    final_negative_results = []
-    for entry in combined_results.values():
-        entry['articles'] = '; '.join(sorted(entry['articles']))
-        entry['database'] = '; '.join(sorted(entry['database']))
-        final_negative_results.append(entry)
-    return "Positive regulation results:", final_positive_results, "Negative regulation results:", final_negative_results
