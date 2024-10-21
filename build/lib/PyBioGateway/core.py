@@ -2,9 +2,10 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from collections import defaultdict
 from .utils import data_processing, translate_chr
 
+sparql_endpoint= "https://2407.biogateway.eu/sparql"
 def type_data(instance): 
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query = """
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -179,7 +180,7 @@ def getGene_info(gene, taxon):
     
 def getGenes_by_coord(chr, start, end , strand):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Construir la consulta SPARQL
     if strand==None:
@@ -231,7 +232,7 @@ def getGenes_by_coord(chr, start, end , strand):
 
 def getProtein_info(protein):
      # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Construir la consulta SPARQL
     query="""
@@ -281,7 +282,7 @@ def getProtein_info(protein):
 
 def getPhenotype(phenotype):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Build the SPARQL query
     query = f"""
@@ -319,7 +320,7 @@ def getPhenotype(phenotype):
 
 def getCRM_info(crm):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Construir la consulta SPARQL
     query="""
@@ -347,8 +348,7 @@ def getCRM_info(crm):
 
 def getCRM_add_info(crm):#función que nos devuelve información adicional del CRM.
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
-    
+    endpoint_sparql = sparql_endpoint    
     # Construir la consulta SPARQL
     query="""
     PREFIX obo: <http://purl.obolibrary.org/obo/>
@@ -404,7 +404,7 @@ def getCRM_add_info(crm):#función que nos devuelve información adicional del C
 
 def getCRMs_by_coord(chromosome, start, end ):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     chromosome_ncbi=translate_chr(chromosome)
     # Construir la consulta SPARQL
     query = """
@@ -431,7 +431,7 @@ def getCRMs_by_coord(chromosome, start, end ):
 
 def getTAD_info(tad):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Construir la consulta SPARQL
     query="""
@@ -458,7 +458,7 @@ def getTAD_info(tad):
 
 def getTAD_add_info(tad):#función que nos devuelve información adicional del CRM.
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Construir la consulta SPARQL
     query="""
@@ -519,7 +519,7 @@ def getTAD_add_info(tad):#función que nos devuelve información adicional del C
 
 def getTADs_by_coord(chromosome, start, end):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     chromosome_ncbi=translate_chr(chromosome)
     
@@ -549,7 +549,7 @@ def getTADs_by_coord(chromosome, start, end):
 
 def gene2protein(gene,taxon):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     if taxon==None:
         query="""
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -630,7 +630,7 @@ def gene2protein(gene,taxon):
         
 def protein2gene(protein):
      # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Construir la consulta SPARQL
     query="""
@@ -674,7 +674,7 @@ def protein2gene(protein):
 
 def gene2phen(gene):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     # Construir la consulta SPARQL
     query="""
     PREFIX obo: <http://purl.obolibrary.org/obo/>
@@ -695,7 +695,7 @@ def gene2phen(gene):
         return(results)
     
 def phen2gene(phenotype):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     
     # Construct the SPARQL query for general phenotype search
     query = f"""
@@ -749,7 +749,7 @@ def phen2gene(phenotype):
 
 def prot2bp(protein):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -842,7 +842,7 @@ def prot2bp(protein):
 
 def bp2prot(biological_process, taxon):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     if taxon is None: # Si no ponemos taxon
         query = """
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1086,7 +1086,7 @@ def bp2prot(biological_process, taxon):
 
 def prot2cc(protein):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -1177,7 +1177,7 @@ def prot2cc(protein):
 
 def cc2prot(cellular_component,taxon):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     if taxon== None:
         query="""
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1424,7 +1424,7 @@ def cc2prot(cellular_component,taxon):
 
 def prot2mf(protein):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""        
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -1522,7 +1522,7 @@ def prot2mf(protein):
 
 def mf2prot(molecular_function,taxon):
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     if taxon== None:
         query="""
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1770,7 +1770,7 @@ def mf2prot(molecular_function,taxon):
     return final_results
 
 def gene2crm(gene):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -1819,7 +1819,7 @@ def gene2crm(gene):
     return final_results
 
 def crm2gene(crm):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -1869,7 +1869,7 @@ def crm2gene(crm):
     return final_results
 
 def tfac2crm(tfac):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -1922,7 +1922,7 @@ def tfac2crm(tfac):
     return final_results
 
 def crm2tfac(crm):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -1976,7 +1976,7 @@ def crm2tfac(crm):
         return final_results
 
 def crm2phen(crm):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     query="""
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2023,6 +2023,7 @@ def crm2phen(crm):
     return final_results
 
 def phen2crm(phenotype):
+    endpoint_sparql= sparql_endpoint
     query = f"""
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -2117,7 +2118,7 @@ def phen2crm(phenotype):
         return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
     
 def tfac2gene(tfac):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     positive_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2233,7 +2234,7 @@ def tfac2gene(tfac):
                 OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
             }
         }
-        """%(tfac)
+        """ %(tfac)
         general_results=data_processing(general_query)
         combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
         for entry in general_results:
@@ -2274,7 +2275,7 @@ def tfac2gene(tfac):
 
 
 def gene2tfac(gene):
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
     positive_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>

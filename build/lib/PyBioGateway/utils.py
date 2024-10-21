@@ -1,9 +1,9 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-
+sparql_endpoint="https://2407.biogateway.eu/sparql"
 def data_processing(consulta): #Función para procesar datos
     # Endpoint SPARQL
-    endpoint_sparql = "http://ssb4.nt.ntnu.no:23122/sparql"
+    endpoint_sparql = sparql_endpoint
 # Inicializar SPARQLWrapper para la primera consulta
     sparql = SPARQLWrapper(endpoint_sparql)
     sparql.setQuery(consulta)
