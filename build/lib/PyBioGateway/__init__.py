@@ -6,7 +6,7 @@ from .core import (
     getTAD_add_info, getTADs_by_coord, gene2protein, protein2gene,
     gene2phen, phen2gene, prot2bp, bp2prot, prot2cc, cc2prot, prot2mf,
     mf2prot, gene2crm, crm2gene, tfac2crm, crm2tfac, crm2phen, phen2crm,
-    tfac2gene, gene2tfac
+    tfac2gene, gene2tfac, prot2prot, prot2ortho, prot_regulates, prot_regulated_by
 )
 from .utils import data_processing, translate_chr
 
@@ -17,5 +17,5 @@ __all__ = [
     'getTAD_add_info', 'getTADs_by_coord', 'gene2protein', 'protein2gene',
     'gene2phen', 'phen2gene', 'prot2bp', 'bp2prot', 'prot2cc', 'cc2prot',
     'prot2mf', 'mf2prot', 'gene2crm', 'crm2gene', 'tfac2crm', 'crm2tfac',
-    'crm2phen', 'phen2crm', 'tfac2gene', 'gene2tfac'
+    'crm2phen', 'phen2crm', 'tfac2gene', 'gene2tfac', 'prot2prot', 'prot2ortho', 'prot_regulates', 'prot_regulated_by' 
 ]

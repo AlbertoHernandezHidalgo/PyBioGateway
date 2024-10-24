@@ -2413,3 +2413,463 @@ def gene2tfac(gene):
             return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function."
         else:
             return "Transcription factors related with the selected gene:", final_general_results
+            
+def prot2prot(protein):
+    endpoint_sparql = sparql_endpoint
+    query="""
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX sch: <http://schema.org/>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX obo: <http://purl.obolibrary.org/obo/>
+    PREFIX sio: <http://semanticscience.org/resource/>
+    PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    SELECT DISTINCT  ?prot_label  ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level ?interaction_details
+        WHERE {
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot skos:prefLabel "%s" .
+                }
+            GRAPH <http://rdf.biogateway.eu/graph/prot2prot> {
+                    ?prot obo:RO_0002436 ?prot2 .
+                    
+            }
+                GRAPH <http://rdf.biogateway.eu/graph/prot2prot> {
+                    ?uri rdf:subject ?prot ;
+                         rdf:predicate ?relation ;
+                         rdf:object ?prot2 ;
+                         skos:prefLabel ?relation_label .
+
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot2 skos:prefLabel ?prot_label 
+                       .
+
+            }
+    BIND(IRI(CONCAT(STR(?uri), "#intact")) AS ?uri_with_intact)
+    GRAPH <http://rdf.biogateway.eu/graph/prot2prot> {
+        ?uri_with_intact sio:SIO_000772 ?articles ;
+                      sio:SIO_000253 ?database ;
+                      sch:evidenceLevel ?evidence_level ;
+                      obo:BFO_0000050 ?interaction_details .
+    }
+        }
+    """ %(protein)
+    results=data_processing(query)
+        
+    if len(results) == 0:
+        query_alt_label="""
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX sch: <http://schema.org/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX obo: <http://purl.obolibrary.org/obo/>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        SELECT DISTINCT  ?prot_label  ?relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level ?interaction_details
+            WHERE {
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot skos:altLabel "%s" .
+                    }
+
+                GRAPH <http://rdf.biogateway.eu/graph/prot2prot> {
+                        ?prot obo:RO_0002436 ?prot2 .
+                        
+                }
+                    GRAPH <http://rdf.biogateway.eu/graph/prot2prot> {
+                        ?uri rdf:subject ?prot ;
+                             rdf:predicate ?relation ;
+                             rdf:object ?prot2 ;
+                             skos:prefLabel ?relation_label .
+                }
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot2 skos:prefLabel ?prot_label 
+                           .
+    
+                }
+        BIND(IRI(CONCAT(STR(?uri), "#intact")) AS ?uri_with_intact)
+        GRAPH <http://rdf.biogateway.eu/graph/prot2prot> {
+            ?uri_with_intact sio:SIO_000772 ?articles ;
+                          sio:SIO_000253 ?database ;
+                          sch:evidenceLevel ?evidence_level ;
+                          obo:BFO_0000050 ?interaction_details .
+        }
+        }
+        """ %(protein)
+        results=data_processing(query_alt_label)
+
+    combined_results = defaultdict(lambda: {"prot_label": "", "relation_label": "", "database": "", "evidence_level": "", "articles": set(), "interaction_details": set()})
+    if not results:
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    
+    # Llenar el diccionario combinando artículos
+
+    for entry in results:
+        key = (entry['prot_label'], entry['relation_label'], entry['database'], entry['evidence_level'])
+        combined_results[key]['prot_label'] = entry['prot_label']
+        combined_results[key]['relation_label'] = entry['relation_label']
+        combined_results[key]['database'] = entry['database']
+        combined_results[key]['evidence_level'] = entry['evidence_level']
+        combined_results[key]['articles'].add(entry['articles'])
+        combined_results[key]['interaction_details'].add(entry['interaction_details'])
+
+    # Convertir el diccionario de vuelta a una lista, uniendo los artículos
+    final_results = []
+    for entry in combined_results.values():
+        entry['articles'] = '; '.join(entry['articles'])
+        entry['interaction_details'] = '; '.join(entry['interaction_details'])
+        final_results.append(entry)
+    return final_results
+
+def prot2ortho (protein):
+    endpoint_sparql = sparql_endpoint
+    query="""
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX sch: <http://schema.org/>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX obo: <http://purl.obolibrary.org/obo/>
+    PREFIX sio: <http://semanticscience.org/resource/>
+    PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+    
+    SELECT DISTINCT ?prot_label ?orthology_relation_label ?taxon ?common_names 
+      (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) ?orthology_details
+    WHERE {
+        {
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?prot skos:prefLabel "%s" .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/ortho> {
+                ?uri rdf:object ?prot ;
+                     rdf:predicate ?relation ;
+                     rdf:subject ?prot2 ;
+                     skos:prefLabel ?orthology_relation_label .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?prot2 skos:prefLabel ?prot_label ;
+                       obo:RO_0002162 ?ncbi_taxon .
+            }
+        }
+        UNION
+        {
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?prot2 skos:prefLabel "%s" .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/ortho> {
+                ?uri rdf:subject ?prot2 ;
+                     rdf:predicate ?relation ;
+                     rdf:object ?prot ;
+                     skos:prefLabel ?orthology_relation_label .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?prot skos:prefLabel ?prot_label ;
+                      obo:RO_0002162 ?ncbi_taxon .
+            }
+        }
+        GRAPH <http://rdf.biogateway.eu/graph/taxon> {
+            ?ncbi_taxon rdfs:label ?taxon ;
+                        oboowl:hasExactSynonym ?common_names .
+        }
+        BIND(IRI(CONCAT(STR(?uri), "#orthodb")) AS ?uri_with_orthodb)
+        GRAPH <http://rdf.biogateway.eu/graph/ortho> {
+            ?uri_with_orthodb sio:SIO_000253 ?database ;
+                              obo:BFO_0000050 ?orthology_details .
+        }
+    }
+    """ %(protein,protein)
+    results=data_processing(query)
+        
+    if len(results) == 0:
+        query_alt_label="""
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX sch: <http://schema.org/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX obo: <http://purl.obolibrary.org/obo/>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        
+        SELECT DISTINCT ?prot_label ?orthology_relation_label ?taxon ?common_names 
+          (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) ?orthology_details
+        WHERE {
+            {
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot skos:altLabel "%s" .
+                }
+                GRAPH <http://rdf.biogateway.eu/graph/ortho> {
+                    ?uri rdf:object ?prot ;
+                         rdf:predicate ?relation ;
+                         rdf:subject ?prot2 ;
+                         skos:prefLabel ?orthology_relation_label .
+                }
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot2 skos:prefLabel ?prot_label ;
+                           obo:RO_0002162 ?ncbi_taxon .
+                }
+            }
+            UNION
+            {
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?prot2 skos:altLabel "%s" .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/ortho> {
+                ?uri rdf:subject ?prot2 ;
+                     rdf:predicate ?relation ;
+                     rdf:object ?prot ;
+                     skos:prefLabel ?orthology_relation_label .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?prot skos:prefLabel ?prot_label ;
+                      obo:RO_0002162 ?ncbi_taxon .
+                }
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/taxon> {
+                ?ncbi_taxon rdfs:label ?taxon ;
+                            oboowl:hasExactSynonym ?common_names .
+            }
+            BIND(IRI(CONCAT(STR(?uri), "#orthodb")) AS ?uri_with_orthodb)
+            GRAPH <http://rdf.biogateway.eu/graph/ortho> {
+                ?uri_with_orthodb sio:SIO_000253 ?database ;
+                                  obo:BFO_0000050 ?orthology_details .
+            }
+        }
+        """ %(protein, protein)
+        results=data_processing(query_alt_label)
+    combined_results = defaultdict(lambda: {"prot_label": "", "orthology_relation_label": "", "taxon": "", "common_names": set(),"database": "", "orthology_details": set()})
+    if not results:
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    
+    # Llenar el diccionario combinando artículos
+    for entry in results:
+        key = (entry['prot_label'], entry['orthology_relation_label'], entry['taxon'], entry['database'])
+        combined_results[key]['prot_label'] = entry['prot_label']
+        combined_results[key]['orthology_relation_label'] = entry['orthology_relation_label']
+        combined_results[key]['taxon'] = entry['taxon']
+        combined_results[key]['database'] = entry['database']
+        combined_results[key]['common_names'].add(entry['common_names'])
+        combined_results[key]['orthology_details'].add(entry['orthology_details'])
+
+    # Convertir el diccionario de vuelta a una lista, uniendo los artículos
+    final_results = []
+    for entry in combined_results.values():
+        entry['common_names'] = '; '.join(entry['common_names'])
+        entry['orthology_details'] = '; '.join(entry['orthology_details'])
+        final_results.append(entry)
+    return final_results
+
+def prot_regulates(protein):
+    endpoint_sparql = sparql_endpoint
+    query="""
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX sch: <http://schema.org/>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX obo: <http://purl.obolibrary.org/obo/>
+    PREFIX sio: <http://semanticscience.org/resource/>
+    PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    SELECT DISTINCT  ?prot_label  ?definition ?regulatory_relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level 
+        WHERE {
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot skos:prefLabel "%s" .
+      
+          }
+                GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+                    ?uri rdf:subject ?prot ;
+                         rdf:predicate ?relation ;
+                         rdf:object ?prot2 ;
+                         skos:definition ?definition ;
+                         skos:prefLabel ?regulatory_relation_label .
+
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot2 skos:prefLabel ?prot_label 
+                       .
+
+            }
+    BIND(IRI(CONCAT(STR(?uri), "#signor")) AS ?uri_with_signor)
+    GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+        ?uri_with_signor sio:SIO_000772 ?articles ;
+                      sio:SIO_000253 ?database ;
+                      sch:evidenceLevel ?evidence_level .
+    }
+        }
+    """ %(protein)
+    results=data_processing(query)
+        
+    if len(results) == 0:
+        query_alt_label="""
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX sch: <http://schema.org/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX obo: <http://purl.obolibrary.org/obo/>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        SELECT DISTINCT  ?prot_label  ?definition ?regulatory_relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level 
+            WHERE {
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot skos:altLabel "%s" .
+                    }
+                    GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+                        ?uri rdf:subject ?prot ;
+                             rdf:predicate ?relation ;
+                             rdf:object ?prot2 ;
+                             skos:definition ?definition ;
+                             skos:prefLabel ?regulatory_relation_label .
+ 
+                }
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot2 skos:prefLabel ?prot_label 
+                           .
+    
+                }
+        BIND(IRI(CONCAT(STR(?uri), "#signor")) AS ?uri_with_signor)
+        GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+            ?uri_with_signor sio:SIO_000772 ?articles ;
+                          sio:SIO_000253 ?database ;
+                          sch:evidenceLevel ?evidence_level .
+        }
+            } 
+        """ %(protein)
+        results=data_processing(query_alt_label)
+
+    combined_results = defaultdict(lambda: {"prot_label": "", "definition": "",  "regulatory_relation_label": "", "database": "", "evidence_level": "", "articles": set()})
+    if not results:
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    
+    # Llenar el diccionario combinando artículos
+    for entry in results:
+        key = (entry['prot_label'], entry['definition'], entry['regulatory_relation_label'], entry['database'], entry['evidence_level'])
+ 
+        combined_results[key]['prot_label'] = entry['prot_label']
+        combined_results[key]['definition'] = entry['definition']
+        combined_results[key]['regulatory_relation_label'] = entry['regulatory_relation_label']
+        combined_results[key]['database'] = entry['database']
+        combined_results[key]['evidence_level'] = entry['evidence_level']
+        combined_results[key]['articles'].add(entry['articles'])
+
+    final_results = []
+    for entry in combined_results.values():
+        entry['articles'] = '; '.join(entry['articles'])
+        final_results.append(entry)
+    seen_labels = set()
+    unique_proteins = []
+    for protein in final_results:
+        if protein['prot_label'] not in seen_labels:
+            seen_labels.add(protein['prot_label'])
+            unique_proteins.append(protein)
+    return unique_proteins       
+
+
+
+def prot_regulated_by(protein):
+    endpoint_sparql = sparql_endpoint
+    query="""
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX sch: <http://schema.org/>
+    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX obo: <http://purl.obolibrary.org/obo/>
+    PREFIX sio: <http://semanticscience.org/resource/>
+    PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    SELECT DISTINCT  ?prot_label  ?definition ?regulatory_relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level 
+        WHERE {
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot skos:prefLabel "%s" .
+      
+          }
+                GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+                    ?uri rdf:object ?prot ;
+                         rdf:predicate ?relation ;
+                         rdf:subject ?prot2 ;
+                         skos:definition ?definition ;
+                         skos:prefLabel ?regulatory_relation_label .
+
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                    ?prot2 skos:prefLabel ?prot_label 
+                       .
+
+            }
+    BIND(IRI(CONCAT(STR(?uri), "#signor")) AS ?uri_with_signor)
+    GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+        ?uri_with_signor sio:SIO_000772 ?articles ;
+                      sio:SIO_000253 ?database ;
+                      sch:evidenceLevel ?evidence_level .
+    
+}
+
+        }
+    """ %(protein)
+    results=data_processing(query)
+        
+    if len(results) == 0:
+        query_alt_label="""
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX sch: <http://schema.org/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX obo: <http://purl.obolibrary.org/obo/>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX oboowl: <http://www.geneontology.org/formats/oboInOwl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT DISTINCT  ?prot_label  ?definition ?regulatory_relation_label (REPLACE(STR(?database), "http://identifiers.org/", "") AS ?database) (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level 
+            WHERE {
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot skos:altLabel "%s" .
+                    }
+                    GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+                        ?uri rdf:object ?prot ;
+                             rdf:predicate ?relation ;
+                             rdf:subject ?prot2 ;
+                             skos:definition ?definition ;
+                             skos:prefLabel ?regulatory_relation_label .
+ 
+                }
+                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                        ?prot2 skos:prefLabel ?prot_label 
+                           .
+    
+                }
+        BIND(IRI(CONCAT(STR(?uri), "#signor")) AS ?uri_with_signor)
+        GRAPH <http://rdf.biogateway.eu/graph/reg2targ> {
+            ?uri_with_signor sio:SIO_000772 ?articles ;
+                          sio:SIO_000253 ?database ;
+                          sch:evidenceLevel ?evidence_level .
+        }
+            } 
+        """ %(protein)
+        results=data_processing(query_alt_label)
+
+    combined_results = defaultdict(lambda: {"prot_label": "", "definition": "",  "regulatory_relation_label": "", "database": "", "evidence_level": "", "articles": set()})
+    if not results:
+         return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
+    
+    for entry in results:
+        key = (entry['prot_label'], entry['definition'], entry['regulatory_relation_label'], entry['database'], entry['evidence_level'])
+ 
+
+        combined_results[key]['prot_label'] = entry['prot_label']
+        combined_results[key]['definition'] = entry['definition']
+        combined_results[key]['regulatory_relation_label'] = entry['regulatory_relation_label']
+        combined_results[key]['database'] = entry['database']
+        combined_results[key]['evidence_level'] = entry['evidence_level']
+        combined_results[key]['articles'].add(entry['articles'])
+
+    final_results = []
+    for entry in combined_results.values():
+        entry['articles'] = '; '.join(entry['articles'])
+        final_results.append(entry)
+    seen_labels = set()
+    unique_proteins = []
+
+    for protein in final_results:
+        if protein['prot_label'] not in seen_labels:
+            seen_labels.add(protein['prot_label'])
+            unique_proteins.append(protein)
+    return unique_proteins    
