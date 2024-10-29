@@ -2658,7 +2658,7 @@ def prot2ortho (protein):
         final_results.append(entry)
     return final_results
 
-def prot_regulates(protein):
+def prot_regulates(protein, regulation_type="all"):
     endpoint_sparql = sparql_endpoint
     query="""
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -2755,6 +2755,11 @@ def prot_regulates(protein):
     for entry in combined_results.values():
         entry['articles'] = '; '.join(entry['articles'])
         final_results.append(entry)
+            # Filtrar por el tipo de regulación: "positive", "negative" o "all"
+    if regulation_type == "positive":
+        final_results = [entry for entry in final_results if "positive regulation" in entry['definition']]
+    elif regulation_type == "negative":
+        final_results = [entry for entry in final_results if "negative regulation" in entry['definition']]
     seen_labels = set()
     unique_proteins = []
     for protein in final_results:
@@ -2765,7 +2770,7 @@ def prot_regulates(protein):
 
 
 
-def prot_regulated_by(protein):
+def prot_regulated_by(protein,regulation_type="all"):
     endpoint_sparql = sparql_endpoint
     query="""
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -2865,6 +2870,11 @@ def prot_regulated_by(protein):
     for entry in combined_results.values():
         entry['articles'] = '; '.join(entry['articles'])
         final_results.append(entry)
+                    # Filtrar por el tipo de regulación: "positive", "negative" o "all"
+    if regulation_type == "positive":
+        final_results = [entry for entry in final_results if "positive regulation" in entry['definition']]
+    elif regulation_type == "negative":
+        final_results = [entry for entry in final_results if "negative regulation" in entry['definition']]
     seen_labels = set()
     unique_proteins = []
 
