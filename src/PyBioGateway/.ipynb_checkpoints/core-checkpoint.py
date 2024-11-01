@@ -228,7 +228,9 @@ def getGenes_by_coord(chr, start, end , strand):
     if len(results)== 0:
         return "No data available for the introduced genomic coordinates."
     else:
-        return results
+        results_sorted = sorted(results, key=lambda x: x['gene_name'])
+
+        return results_sorted
 
 def getProtein_info(protein):
      # Endpoint SPARQL
@@ -287,14 +289,14 @@ def getPhenotype(phenotype):
     # Build the SPARQL query
     query = f"""
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-    SELECT DISTINCT (REPLACE(STR(?omim_id), "http://purl.bioontology.org/ontology/OMIM/", "") AS ?omim_id) ?label
+    SELECT DISTINCT (REPLACE(STR(?omim_id), "http://purl.bioontology.org/ontology/OMIM/", "") AS ?omim_id) ?phen_label
     WHERE {{
         GRAPH <http://rdf.biogateway.eu/graph/omim> {{
-            {{?omim_id skos:prefLabel ?label}}
+            {{?omim_id skos:prefLabel ?phen_label}}
             UNION
-            {{?omim_id skos:altLabel ?label}}
+            {{?omim_id skos:altLabel ?phen_label}}
         }}
-        FILTER regex(?label, "{phenotype}", "i")
+        FILTER regex(?phen_label, "{phenotype}", "i")
     }}
     """
     
@@ -316,7 +318,8 @@ def getPhenotype(phenotype):
             results = data_processing(query_phen)
         else:
             return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
-    return results
+    results_sorted = sorted(results, key=lambda x: x['phen_label'])        
+    return results_sorted
 
 def getCRM_info(crm):
     # Endpoint SPARQL
@@ -427,7 +430,9 @@ def getCRMs_by_coord(chromosome, start, end ):
     if len(results)== 0:
         return "No data available for the introduced genomic coordinates."
     else:
-        return results
+        results_sorted = sorted(results, key=lambda x: x['crm_name'])
+
+        return results_sorted
 
 def getTAD_info(tad):
     # Endpoint SPARQL
@@ -545,7 +550,9 @@ def getTADs_by_coord(chromosome, start, end):
     if len(results)== 0:
         return "No data available for the introduced genomic coordinates."
     else:
-        return results
+        results_sorted = sorted(results, key=lambda x: x['tad_id'])
+
+        return results_sorted
 
 def gene2protein(gene,taxon):
     # Endpoint SPARQL
@@ -567,9 +574,10 @@ def gene2protein(gene,taxon):
             }
         """%(gene)
         results=data_processing(query)
+        results_sorted = sorted(results, key=lambda x: x['prot_name'])
         if not results:
             return "No data available for the introduced gene. Check that the gene id is correct or if you have introduced the taxon correctly."
-        return results
+        return results_sorted
     else:
         if taxon.isdigit():
             # Si se proporciona el número de taxón
@@ -589,9 +597,10 @@ def gene2protein(gene,taxon):
                 }
             """ %(taxon,gene)
             results=data_processing(query)
+            results_sorted = sorted(results, key=lambda x: x['prot_name'])
             if not results:
                 return "No data available for the introduced gene. Check that the gene id is correct or if you have introduced the taxon correctly."
-            return results
+            return results_sorted
         else:
             # Si se proporciona el nombre del taxón
             query_tax = """
@@ -624,9 +633,10 @@ def gene2protein(gene,taxon):
                 }
             """ %(num_taxon,gene)
             results=data_processing(query)
+            results_sorted = sorted(results, key=lambda x: x['prot_name'])
             if not results:
                 return "No data available for the introduced gene. Check that the gene id is correct or if you have introduced the taxon correctly."
-            return results
+            return results_sorted
         
 def protein2gene(protein):
      # Endpoint SPARQL
@@ -670,7 +680,8 @@ def protein2gene(protein):
     if len(results)== 0 :
          return "No data available for the introduced protein or you may have introduced an instance that is not a protein. Check your data type with type_data function."
     else:
-        return(results)
+        results_sorted = sorted(results, key=lambda x: x['gene_id'])
+        return results_sorted
 
 def gene2phen(gene):
     # Endpoint SPARQL
@@ -692,7 +703,8 @@ def gene2phen(gene):
     if len(results)== 0:
         return "No data available for the introduced gene or you may have introduced an instance is not a gene. Check your data type with type_data function."
     else:
-        return(results)
+        results_sorted = sorted(results, key=lambda x: x['phen_label'])
+        return(results_sorted)
     
 def phen2gene(phenotype):
     endpoint_sparql = sparql_endpoint
@@ -741,7 +753,8 @@ def phen2gene(phenotype):
             """ 
             results = data_processing(query_phen)
     if len(results) != 0:
-        return results
+        results_sorted = sorted(results, key=lambda x: x['gene_name'])
+        return results_sorted
     else:
         return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
 
@@ -838,7 +851,8 @@ def prot2bp(protein):
     for entry in combined_results.values():
         entry['articles'] = '; '.join(entry['articles'])
         final_results.append(entry)
-    return final_results
+    results_sorted = sorted(final_results, key=lambda x: x['bp_label'])
+    return results_sorted
 
 def bp2prot(biological_process, taxon):
     # Endpoint SPARQL
@@ -1173,7 +1187,8 @@ def prot2cc(protein):
     for entry in combined_results.values():
         entry['articles'] = '; '.join(entry['articles'])
         final_results.append(entry)
-    return final_results
+    results_sorted = sorted(final_results, key=lambda x: x['cc_label'])
+    return results_sorted
 
 def cc2prot(cellular_component,taxon):
     # Endpoint SPARQL
@@ -1518,7 +1533,8 @@ def prot2mf(protein):
     for entry in combined_results.values():
         entry['articles'] = '; '.join(entry['articles'])
         final_results.append(entry)
-    return final_results
+    results_sorted = sorted(final_results, key=lambda x: x['mf_label'])
+    return results_sorted
 
 def mf2prot(molecular_function,taxon):
     # Endpoint SPARQL
@@ -1866,7 +1882,9 @@ def crm2gene(crm):
         final_results.append(entry)
     if not results:
         return "No data available for the introduced crm or you may have introduced an instance that is not a crm. Check your data type with type_data function."     
-    return final_results
+    results_sorted = sorted(final_results, key=lambda x: x['gene_name'])
+    return results_sorted
+
 
 def tfac2crm(tfac):
     endpoint_sparql = sparql_endpoint
@@ -1919,7 +1937,10 @@ def tfac2crm(tfac):
         entry['database'] = '; '.join(sorted(entry['database']))
         entry['biological_samples'] = '; '.join(sorted(entry['biological_samples']))
         final_results.append(entry)
-    return final_results
+    
+    results_sorted = sorted(final_results, key=lambda x: x['crm_name'])
+    return results_sorted
+
 
 def crm2tfac(crm):
     endpoint_sparql = sparql_endpoint
@@ -1973,7 +1994,9 @@ def crm2tfac(crm):
         entry['biological_samples'] = '; '.join(sorted(entry['biological_samples']))
         final_results.append(entry)
     else:
-        return final_results
+        results_sorted = sorted(final_results, key=lambda x: x['tfac_name'])
+        return results_sorted
+
 
 def crm2phen(crm):
     endpoint_sparql = sparql_endpoint
@@ -2020,10 +2043,12 @@ def crm2phen(crm):
         entry['articles'] = '; '.join(sorted(entry['articles']))
         entry['database'] = '; '.join(sorted(entry['database']))
         final_results.append(entry)
-    return final_results
+    results_sorted = sorted(final_results, key=lambda x: x['phen_id'])
+    return results_sorted
+
 
 def phen2crm(phenotype):
-    endpoint_sparql= sparql_endpoint
+    endpoint_sparql = sparql_endpoint
     query = f"""
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -2056,9 +2081,9 @@ def phen2crm(phenotype):
     
     results = data_processing(query)
 
-    
     if len(results) == 0:
-        if phenotype.isdigit() and len(phenotype) == 6 or phenotype.startswith("MTHU"):
+
+        if phenotype.isdigit() and (len(phenotype) == 6 or phenotype.startswith("MTHU")):
             alt_query = f"""
             PREFIX obo: <http://purl.obolibrary.org/obo/>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2085,12 +2110,9 @@ def phen2crm(phenotype):
             """
             results = data_processing(alt_query)
 
-            
-
-    
     # Procesamiento de los resultados
     combined_results = defaultdict(lambda: {"crm_name": "", "omim_id": set(), "database": set(), "articles": set()})
-    
+
     for entry in results:
         if 'crm_name' in entry:
             key = entry['crm_name']
@@ -2101,24 +2123,28 @@ def phen2crm(phenotype):
                 combined_results[key]['database'].add(entry['database'])
             if 'articles' in entry:
                 combined_results[key]['articles'].add(entry['articles'])
-    
+
     final_results = []
     for entry in combined_results.values():
-        # Eliminar omim_id en los resultados de la segunda consulta
-        if phenotype.isdigit() and len(phenotype) == 6:
-            del entry['omim_id']
-        else:
-            entry['omim_id'] = '; '.join(entry['omim_id'])
-        entry['database'] = '; '.join(entry['database'])
-        entry['articles'] = '; '.join(entry['articles'])
-        final_results.append(entry)
+        # Asegúrate de que no eliminas entradas necesarias
+        entry['omim_id'] = '; '.join(entry['omim_id']) if entry['omim_id'] else ''
+        entry['database'] = '; '.join(entry['database']) if entry['database'] else ''
+        entry['articles'] = '; '.join(entry['articles']) if entry['articles'] else ''
+        
+        # Asegúrate de añadir a final_results
+        if entry['crm_name']:  # Solo añadir si hay un crm_name
+            final_results.append(entry)
+
     if len(final_results) != 0:
-        return final_results
+        results_sorted = sorted(final_results, key=lambda x: x['crm_name'])
+        return results_sorted
     else:
         return "No data available for the introduced phenotype or you may have introduced an instance that is not a phenotype. Check your data type with type_data function."
-    
-def tfac2gene(tfac):
+
+def tfac2gene(tfac, regulation_type="all"):
     endpoint_sparql = sparql_endpoint
+
+    # Consulta para regulación positiva
     positive_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2151,6 +2177,11 @@ def tfac2gene(tfac):
     """ % (tfac)
     
     positive_results = data_processing(positive_query)
+    if regulation_type == "positive":
+        positive_results = [entry for entry in positive_results if "involved in positive regulation" in entry['definition']]
+        if not positive_results:
+            return "No data available on positive regulation of the introduced trasncription factor. Use the ‘all’ option to search for regulatory information without specifying the type."
+
     combined_positive_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
 
     # Llenar el diccionario combinando artículos
@@ -2169,7 +2200,9 @@ def tfac2gene(tfac):
         entry['articles'] = '; '.join(sorted(entry['articles'])) if entry['articles'] else ''
         entry['database'] = '; '.join(sorted(entry['database']))
         final_positive_results.append(entry)
-    
+    results_sorted_positive = sorted(final_positive_results, key=lambda x: x['gene_name'])
+
+    # Consulta para regulación negativa
     negative_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2202,59 +2235,13 @@ def tfac2gene(tfac):
     """ % (tfac)
     
     negative_results = data_processing(negative_query)
+    if regulation_type == "negative":
+        negative_results = [entry for entry in negative_results if "involved in negative regulation" in entry['definition']]
+        if not negative_results:
+            return "No data available on negative regulation of the introduced transcription factor. Use the ‘all’ option to search for regulatory information without specifying the type."
     combined_negative_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
 
-    if not negative_results and not positive_results:
-        general_query= """
-        PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        PREFIX sio: <http://semanticscience.org/resource/>
-        PREFIX sch: <http://schema.org/>
-        SELECT DISTINCT ?gene_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)  ?evidence_level ?definition
-        WHERE {
-        GRAPH <http://rdf.biogateway.eu/graph/prot> {
-            ?tfac skos:prefLabel "%s" .
-        }
-
-        GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
-                ?s rdfs:subject ?tfac ;
-                    rdfs:object ?gene .
-            }
-        GRAPH <http://rdf.biogateway.eu/graph/gene> {
-                ?gene skos:prefLabel ?gene_name.
-            }
-         GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
-                ?s rdfs:subject ?tfac ; 
-                   rdfs:predicate ?relation ; 
-                   rdfs:object ?gene ;
-                   skos:definition ?definition .
-               ?uri rdfs:type ?s .
-                OPTIONAL { ?uri  sio:SIO_000772 ?articles . }
-                OPTIONAL { ?uri sio:SIO_000253 ?database . }
-                OPTIONAL { ?uri   sch:evidenceLevel ?evidence_level. }
-            }
-        }
-        """ %(tfac)
-        general_results=data_processing(general_query)
-        combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""} )
-        for entry in general_results:
-            key = (entry['gene_name'],entry['evidence_level'],entry['definition'])
-            combined_results[key]['gene_name'] = entry['gene_name']
-            combined_results[key]['evidence_level'] = entry['evidence_level']
-            combined_results[key]['definition'] = entry['definition']
-            combined_results[key]['database'].add(entry['database'])
-            combined_results[key]['articles'].add(entry['articles'])
-        final_general_results = []
-        for entry in combined_results.values():
-            entry['articles'] = '; '.join(sorted(entry['articles']))
-            entry['database'] = '; '.join(sorted(entry['database']))
-            final_general_results.append(entry)        
-        if not general_results:
-            return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor. Check your data type with type_data function."
-        else:
-            return "Genes related with the selected transcription factor:", final_general_results
-    
-    # Llenar el diccionario combinando artículos
+    # Llenar el diccionario combinando artículos de resultados negativos
     for entry in negative_results:
         key = (entry['gene_name'], entry['evidence_level'], entry['definition'])
         combined_negative_results[key]['gene_name'] = entry['gene_name']
@@ -2270,12 +2257,74 @@ def tfac2gene(tfac):
         entry['articles'] = '; '.join(sorted(entry['articles'])) if entry['articles'] else ''
         entry['database'] = '; '.join(sorted(entry['database']))
         final_negative_results.append(entry)
-    
-    return "Positive regulation results:", final_positive_results, "Negative regulation results:", final_negative_results
+    results_sorted_negative = sorted(final_negative_results, key=lambda x: x['gene_name'])
+
+    # Consultar general si ambos resultados están vacíos
+    if not positive_results and not negative_results and regulation_type == "all":
+        general_query = """
+        PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX sio: <http://semanticscience.org/resource/>
+        PREFIX sch: <http://schema.org/>
+        SELECT DISTINCT ?gene_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles) ?evidence_level ?definition
+        WHERE {
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
+                ?tfac skos:prefLabel "%s" .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+                ?s rdfs:subject ?tfac ;
+                   rdfs:object ?gene .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/gene> {
+                ?gene skos:prefLabel ?gene_name .
+            }
+            GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+                ?s rdfs:subject ?tfac ; 
+                   rdfs:predicate ?relation ; 
+                   rdfs:object ?gene ;
+                   skos:definition ?definition .
+                ?uri rdfs:type ?s .
+                OPTIONAL { ?uri sio:SIO_000772 ?articles . }
+                OPTIONAL { ?uri sio:SIO_000253 ?database . }
+                OPTIONAL { ?uri sch:evidenceLevel ?evidence_level. }
+            }
+        }
+        """ % (tfac)
+        
+        general_results = data_processing(general_query)
+        if not general_results:
+            return "No data available for the introduced transcription factor or you may have introduced an instance that is not a transcription factor. Check your data type with type_data function."
+
+        combined_results = defaultdict(lambda: {"gene_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
+        for entry in general_results:
+            key = (entry['gene_name'], entry['evidence_level'], entry['definition'])
+            combined_results[key]['gene_name'] = entry['gene_name']
+            combined_results[key]['evidence_level'] = entry['evidence_level']
+            combined_results[key]['definition'] = entry['definition']
+            combined_results[key]['database'].add(entry['database'])
+            combined_results[key]['articles'].add(entry['articles'])
+        
+        final_general_results = []
+        for entry in combined_results.values():
+            entry['articles'] = '; '.join(sorted(entry['articles']))
+            entry['database'] = '; '.join(sorted(entry['database']))
+            final_general_results.append(entry)
+        
+        results_sorted_general = sorted(final_general_results, key=lambda x: x['gene_name'])
+        return "Genes related with the selected transcription factor:", results_sorted_general
+    # Retornar resultados según el tipo de regulación
+    if regulation_type == "positive":
+        return "Positive regulation results:", results_sorted_positive
+    elif regulation_type == "negative":
+        return "Negative regulation results:", results_sorted_negative
+    else:
+        return "Positive regulation results:", results_sorted_positive, "Negative regulation results:", results_sorted_negative
 
 
-def gene2tfac(gene):
+def gene2tfac(gene, regulation_type="all"):
     endpoint_sparql = sparql_endpoint
+
+    # Consulta para regulación positiva
     positive_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2306,27 +2355,35 @@ def gene2tfac(gene):
             }
     }
     """ % (gene)
+    
+    # Procesamiento de resultados positivos
     positive_results = data_processing(positive_query)
-    combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
-
-    # Llenar el diccionario combinando artículos
+    if regulation_type == "positive":
+        positive_results = [entry for entry in positive_results if "involved in positive regulation" in entry['definition']]
+        if not positive_results:
+            return "No data available on positive regulation of the introduced gene. Use the ‘all’ option to search for regulatory information without specifying the type."
+    
+    # Combina resultados positivos
+    combined_positive_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
     for entry in positive_results:
         key = (entry['tfac_name'], entry['evidence_level'], entry['definition'])
-        combined_results[key]['tfac_name'] = entry['tfac_name']
-        combined_results[key]['evidence_level'] = entry['evidence_level']
-        combined_results[key]['definition'] = entry['definition']
-        if 'database' in entry:
-            combined_results[key]['database'].add(entry['database'])
-        if 'articles' in entry:
-            combined_results[key]['articles'].add(entry['articles'])
-
-    # Convertir el diccionario de vuelta a una lista, uniendo los artículos
+        combined_positive_results[key]['tfac_name'] = entry['tfac_name']
+        combined_positive_results[key]['evidence_level'] = entry['evidence_level']
+        combined_positive_results[key]['definition'] = entry['definition']
+        if entry.get('database'):
+            combined_positive_results[key]['database'].add(entry['database'])
+        if entry.get('articles'):
+            combined_positive_results[key]['articles'].add(entry['articles'])
+    
+    # Convertir lista consolidada y ordenada de positivos
     final_positive_results = []
-    for entry in combined_results.values():
-        entry['articles'] = '; '.join(sorted(entry['articles']))
-        entry['database'] = '; '.join(sorted(entry['database']))
+    for entry in combined_positive_results.values():
+        entry['articles'] = '; '.join(sorted(entry['articles'])) if entry['articles'] else ''
+        entry['database'] = '; '.join(sorted(entry['database'])) if entry['database'] else ''
         final_positive_results.append(entry)
+    results_sorted_positive = sorted(final_positive_results, key=lambda x: x['tfac_name'])
 
+    # Consulta para regulación negativa
     negative_query = """
     PREFIX obo: <http://purl.obolibrary.org/obo/>
     PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2336,10 +2393,10 @@ def gene2tfac(gene):
 
     SELECT DISTINCT ?tfac_name ?database (REPLACE(STR(?articles), "http://identifiers.org/", "") AS ?articles)  ?evidence_level ?definition
     WHERE {
-    GRAPH <http://rdf.biogateway.eu/graph/gene> {
+        GRAPH <http://rdf.biogateway.eu/graph/gene> {
                 ?gene skos:prefLabel "%s" .
             }
-    GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
+        GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
                 ?tfac obo:RO_0002430 ?gene .
             }
         GRAPH <http://rdf.biogateway.eu/graph/prot> {
@@ -2357,10 +2414,36 @@ def gene2tfac(gene):
             }
     }
     """ % (gene)
+    
+    # Procesamiento de resultados negativos
     negative_results = data_processing(negative_query)
-    combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
+    if regulation_type == "negative":
+        negative_results = [entry for entry in negative_results if "involved in negative regulation" in entry['definition']]
+        if not negative_results:
+            return "No data available on negative regulation of the introduced gene. Use the ‘all’ option to search for regulatory information without specifying the type."
+    
+    # Combina resultados negativos
+    combined_negative_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
+    for entry in negative_results:
+        key = (entry['tfac_name'], entry['evidence_level'], entry['definition'])
+        combined_negative_results[key]['tfac_name'] = entry['tfac_name']
+        combined_negative_results[key]['evidence_level'] = entry['evidence_level']
+        combined_negative_results[key]['definition'] = entry['definition']
+        if entry.get('database'):
+            combined_negative_results[key]['database'].add(entry['database'])
+        if entry.get('articles'):
+            combined_negative_results[key]['articles'].add(entry['articles'])
+    
+    # Convertir lista consolidada y ordenada de negativos
+    final_negative_results = []
+    for entry in combined_negative_results.values():
+        entry['articles'] = '; '.join(sorted(entry['articles'])) if entry['articles'] else ''
+        entry['database'] = '; '.join(sorted(entry['database'])) if entry['database'] else ''
+        final_negative_results.append(entry)
+    results_sorted_negative = sorted(final_negative_results, key=lambda x: x['tfac_name'])
 
-    if not negative_results and not positive_results:
+    # Consulta general si no hay resultados
+    if not positive_results and not negative_results and regulation_type == "all":
         general_query = """
         PREFIX rdfs: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -2375,7 +2458,7 @@ def gene2tfac(gene):
                 ?s rdfs:object ?gene ;
                     rdfs:subject ?tfac .
             }
-                GRAPH <http://rdf.biogateway.eu/graph/prot> {
+            GRAPH <http://rdf.biogateway.eu/graph/prot> {
                 ?tfac skos:prefLabel ?tfac_name
             }
             GRAPH <http://rdf.biogateway.eu/graph/tfac2gene> {
@@ -2390,29 +2473,40 @@ def gene2tfac(gene):
             }
         }
         """ % (gene)
+        
         general_results = data_processing(general_query)
-        combined_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
-
-        for entry in general_results:
-            key = (entry['tfac_name'], entry['evidence_level'], entry['definition'])
-            combined_results[key]['tfac_name'] = entry['tfac_name']
-            combined_results[key]['evidence_level'] = entry['evidence_level']
-            combined_results[key]['definition'] = entry['definition']
-            if 'database' in entry:
-                combined_results[key]['database'].add(entry['database'])
-            if 'articles' in entry:
-                combined_results[key]['articles'].add(entry['articles'])
-
-        final_general_results = []
-        for entry in combined_results.values():
-            entry['articles'] = '; '.join(sorted(entry['articles']))
-            entry['database'] = '; '.join(sorted(entry['database']))
-            final_general_results.append(entry)
-
         if not general_results:
             return "No data available for the introduced gene or you may have introduced an instance that is not a gene. Check your data type with type_data function."
-        else:
-            return "Transcription factors related with the selected gene:", final_general_results
+        
+        # Procesar resultados generales
+        combined_general_results = defaultdict(lambda: {"tfac_name": "", "database": set(), "articles": set(), "evidence_level": "", "definition": ""})
+        for entry in general_results:
+            key = (entry['tfac_name'], entry['evidence_level'], entry['definition'])
+            combined_general_results[key]['tfac_name'] = entry['tfac_name']
+            combined_general_results[key]['evidence_level'] = entry['evidence_level']
+            combined_general_results[key]['definition'] = entry['definition']
+            if entry.get('database'):
+                combined_general_results[key]['database'].add(entry['database'])
+            if entry.get('articles'):
+                combined_general_results[key]['articles'].add(entry['articles'])
+
+        final_general_results = []
+        for entry in combined_general_results.values():
+            entry['articles'] = '; '.join(sorted(entry['articles'])) if entry['articles'] else ''
+            entry['database'] = '; '.join(sorted(entry['database'])) if entry['database'] else ''
+            final_general_results.append(entry)
+        results_sorted_general = sorted(final_general_results, key=lambda x: x['tfac_name'])
+        return "Transcription factors related with the selected gene:", results_sorted_general
+
+    # Retornar resultados según el tipo de regulación
+    if regulation_type == "positive":
+        return "Positive regulation results:", results_sorted_positive
+    elif regulation_type == "negative":
+        return "Negative regulation results:", results_sorted_negative
+    else:
+        return "Positive regulation results:", results_sorted_positive, "Negative regulation results:", results_sorted_negative
+
+
             
 def prot2prot(protein):
     endpoint_sparql = sparql_endpoint
@@ -2520,8 +2614,9 @@ def prot2prot(protein):
         entry['articles'] = '; '.join(entry['articles'])
         entry['interaction_details'] = '; '.join(entry['interaction_details'])
         final_results.append(entry)
-    return final_results
-
+    results_sorted = sorted(final_results, key=lambda x: x['prot_label'])
+    return results_sorted
+    
 def prot2ortho (protein):
     endpoint_sparql = sparql_endpoint
     query="""
@@ -2656,8 +2751,9 @@ def prot2ortho (protein):
         entry['common_names'] = '; '.join(entry['common_names'])
         entry['orthology_details'] = '; '.join(entry['orthology_details'])
         final_results.append(entry)
-    return final_results
-
+    results_sorted = sorted(final_results, key=lambda x: x['prot_label'])
+    return results_sorted
+    
 def prot_regulates(protein, regulation_type="all"):
     endpoint_sparql = sparql_endpoint
     query="""
@@ -2758,11 +2854,16 @@ def prot_regulates(protein, regulation_type="all"):
             # Filtrar por el tipo de regulación: "positive", "negative" o "all"
     if regulation_type == "positive":
         final_results = [entry for entry in final_results if "positive regulation" in entry['definition']]
+        if not final_results:
+            return "No data available on positive regulation of the introduced gene. Use the ‘all’ option to search for regulatory information without specifying the type."
     elif regulation_type == "negative":
         final_results = [entry for entry in final_results if "negative regulation" in entry['definition']]
+        if not final_results:
+            return "No data available on negative regulation of the introduced gene. Use the ‘all’ option to search for regulatory information without specifying the type."
+    results_sorted = sorted(final_results, key=lambda x: x['prot_label'])
     seen_labels = set()
     unique_proteins = []
-    for protein in final_results:
+    for protein in results_sorted:
         if protein['prot_label'] not in seen_labels:
             seen_labels.add(protein['prot_label'])
             unique_proteins.append(protein)
@@ -2873,12 +2974,17 @@ def prot_regulated_by(protein,regulation_type="all"):
                     # Filtrar por el tipo de regulación: "positive", "negative" o "all"
     if regulation_type == "positive":
         final_results = [entry for entry in final_results if "positive regulation" in entry['definition']]
+        if not final_results:
+            return "No data available on positive regulation of the introduced gene. Use the ‘all’ option to search for regulatory information without specifying the type."
     elif regulation_type == "negative":
         final_results = [entry for entry in final_results if "negative regulation" in entry['definition']]
+        if not final_results:
+            return "No data available on negative regulation of the introduced gene. Use the ‘all’ option to search for regulatory information without specifying the type."
+    results_sorted = sorted(final_results, key=lambda x: x['prot_label'])
     seen_labels = set()
     unique_proteins = []
 
-    for protein in final_results:
+    for protein in results_sorted:
         if protein['prot_label'] not in seen_labels:
             seen_labels.add(protein['prot_label'])
             unique_proteins.append(protein)
